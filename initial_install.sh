@@ -1,5 +1,15 @@
 #!/bin/bash
 
+mkdir audio
+mkdir audio/clips
+mkdir audio/users
+
+mkdir images
+
+mkdir logs
+mkdir logs/nicknames
+
+mkdir settings
 sudo apt update
 sudo apt install postgresql postgresql-contrib
 sudo apt install ffmpeg
