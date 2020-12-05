@@ -1,3 +1,17 @@
+#ignore
+audio/*
+logs/*
+settings/*
+images/*
+cogs/image_cog.py
+!settings/default_settings.dat
+!audio/.gitkeep
+!logs/.gitkeep
+!logs/nicknames/.gitkeep
+
+!settings/.gitkeep
+!images/.gitkeep
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
