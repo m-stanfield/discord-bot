@@ -119,7 +119,7 @@ class audio(commands.Cog):
         audiofile = ''
         
         customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
-        defaultfile = 'default_' + member.display_name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+        defaultfile = 'default_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
         
         text = member.display_name
         if not(default_audio):

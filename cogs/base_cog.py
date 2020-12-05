@@ -68,7 +68,7 @@ class base(commands.Cog):
 
             print('Generating Audio for %s to say %s'%(after.name,after.display_name))
             defaultfile = 'default_' + after.name +'_'+ str(after.id)+ '_'+ str(after.guild.id) +'.mp3'
-                  
+            print(after.display_name,'audio/users/'+defaultfile)      
             audio = self.bot.get_cog('audio')
             audio.generate_audio(after.display_name,'audio/users/'+defaultfile)
 
