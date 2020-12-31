@@ -17,7 +17,7 @@ class images(commands.Cog):
             #print(ctx.message.content)
             try:
                 await ctx.message.delete()
-            except discord.errors.NotFound:
-                print('not found')
+            except discord.errors.Forbidden:
+                print('Message could not be deleted:Forbidden Error')
             #print(ctx.message.content)
             await ctx.send(file=discord.File(fileName)) 
