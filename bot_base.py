@@ -56,17 +56,7 @@ async def run(TOKENS):
     bot = Bot( command_prefix=commands.when_mentioned_or("!"),
                         description='Introductiongeneral discord bot',
                         intents=intents,db=db)
-
-
-
-    # TODO: Update existing profiles to ensure all fields are satisfied
-
-
-
-
-    # TODO:
-
-
+    #adding cogs to bot
     bot.add_cog(base(bot))
     bot.add_cog(users(bot))
     bot.add_cog(general(bot))

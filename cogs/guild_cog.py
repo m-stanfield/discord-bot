@@ -11,6 +11,9 @@ class guilds(commands.Cog):
         self.bot = bot
 
     def load_defaults(self, directory=None):
+        '''
+        Reads config file from directory containing the default settings for a server
+        '''
         if directory == None:
             path = 'guild_defaults.dat'
         else:
@@ -19,9 +22,9 @@ class guilds(commands.Cog):
         if os.path.exists(path):
             with open(path,'r') as f:
                 content = f.readlines()
-            
-            
-            content = [x.strip().replace('\t','').replace(' ','')  for x in content] 
+
+
+            content = [x.strip().replace('\t','').replace(' ','')  for x in content]
             dic = {}
             for line in content:
                 if len(line) > 0:
@@ -29,7 +32,7 @@ class guilds(commands.Cog):
                     varname = a[0]
                     vartype = a[1].split(':')[0]
                     varval = a[1].split(':')[1]
-                    
+
 
 
                     if vartype == 'BOOL':
@@ -45,9 +48,7 @@ class guilds(commands.Cog):
                             dic[a[0]] = ('BIGINT',int(varval))
                         except ValueError:
                             dic[a[0]] = ('TEXT',str(varval))
-                    
+
             return dic
         else:
-            return {}    
-        
-        
+            return {}

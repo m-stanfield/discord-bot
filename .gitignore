@@ -11,7 +11,7 @@ cogs/image_cog.py
 
 !settings/.gitkeep
 !images/.gitkeep
-
+.env
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
