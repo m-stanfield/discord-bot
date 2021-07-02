@@ -20,6 +20,7 @@ parser.add_argument('--cogpath', type=str,default='cogs/')
 args = parser.parse_args()
 
 pathList = glob.glob(args.imagepath + '*.png')
+pathList = glob.glob(args.imagepath + '*.gif') + pathList
 fileList = []
 longestLen = 0
 lengths = []
