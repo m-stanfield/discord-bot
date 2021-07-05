@@ -20,4 +20,4 @@ class images(commands.Cog):
             except discord.errors.Forbidden:
                 print('Message could not be deleted:Forbidden Error')
             #print(ctx.message.content)
-            await ctx.send(file=discord.File(fileName)) 
+            await ctx.send(f'From: {ctx.author.display_name}',file=discord.File(fileName)) 
