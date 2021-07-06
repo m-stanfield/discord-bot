@@ -55,16 +55,18 @@ class audio(commands.Cog):
     @commands.command()
     async def say(self,ctx,*args):
         '''Text-to-speech of whatever is said after !say command'''
-        await ctx.message.delete()
-        string = ''
-        for part in args:
-            string += part
-            string += ' '
+  
         channel = self.find_voicechat(ctx)
-        print(args,string)
-        filePath = 'audio/clips/say.mp3'
-        self.generate_audio(string,filePath)
-        await self.play_audio(channel,filePath,volume=0.5,length=5)
+        if channel:
+            await ctx.message.delete()
+            string = ''
+            for part in args:
+                string += part
+                string += ' '
+            print(args,string)
+            filePath = 'audio/clips/say.mp3'
+            self.generate_audio(string,filePath)
+            await self.play_audio(channel,filePath,volume=0.5,length=5)
 
 
     @commands.command()
