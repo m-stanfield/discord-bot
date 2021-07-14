@@ -23,7 +23,8 @@ from image_cog import images
 from user_cog import users
 from guild_cog import guilds
 from general_cog import general
-
+sys.path.append('cogs/cog_generators')
+from image_cog_gen import generate_images
 sys.path.append('functions')
 import profile_fun as pf
 #from profile_fun import load_defaults
@@ -45,7 +46,7 @@ for key in env:
     TOKENS[key] = os.getenv(key)
 
 async def run(TOKENS):
-
+    generate_images()
     credentials = {"user": TOKENS["SQL_USER"], "password": TOKENS["SQL_PASS"], "database": TOKENS["SQL_DB"], "host": TOKENS["host"]}
     db = await asyncpg.create_pool(**credentials)
 
@@ -81,6 +82,6 @@ class Bot(commands.Bot):
         )
 
         self.db = kwargs.pop("db")
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run(TOKENS))
+while True:
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(run(TOKENS))
