@@ -12,7 +12,7 @@ import asyncpg
 
 import discord
 from discord.ext import commands
-
+import importlib
 
 
 
@@ -47,6 +47,8 @@ for key in env:
 
 async def run(TOKENS):
     generate_images()
+    importlib.reload(sys.modules['image_cog'])
+    from image_cog import images
     credentials = {"user": TOKENS["SQL_USER"], "password": TOKENS["SQL_PASS"], "database": TOKENS["SQL_DB"], "host": TOKENS["host"]}
     db = await asyncpg.create_pool(**credentials)
 

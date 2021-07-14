@@ -2,7 +2,7 @@ from discord.ext import commands
 import discord
 import sys
 import os
-print(os.getcwd())
+#print(os.getcwd())
 sys.path.append('functions')
 import profile_fun as pf
 from datetime import datetime
@@ -27,6 +27,13 @@ class base(commands.Cog):
             await self.bot.logout()
 
 
+    @commands.command()
+    async def restart(self,ctx):
+        '''Shuts bot down. Only usable by bot owner'''
+        users = self.bot.get_cog('users')
+        superuser = await users.pull_value(ctx.author.guild,ctx.author,'superuser')
+        if superuser:
+            await self.bot.logout()
 
 
     @commands.Cog.listener()
