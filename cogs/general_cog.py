@@ -14,6 +14,10 @@ class general(commands.Cog):
     @commands.command()
     async def inspire(self, ctx, *args):
         await ctx.send(inspirobot.generate().url)
+        try:
+            await ctx.message.delete()
+        except discord.errors.Forbidden:
+            print("Message could not be deleted: Forbidden Error")
 
     @commands.command()
     async def roll(self,ctx,*args):
