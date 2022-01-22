@@ -21,3 +21,4 @@ pip install numpy
 conda install h5py
 pip install asyncpg
 pip install gTTS
+pip install git+https://github.com/SamHDev/insiro.git
