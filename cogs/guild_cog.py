@@ -1,13 +1,15 @@
 from discord.ext import commands
 import os
 import sys
-sys.path.append('functions')
-import profile_fun as pf
 
+import functions.profile_fun as pf
+import logging
+
+logger = logging.getLogger()
 
 class guilds(commands.Cog):
     def __init__(self, bot):
-        print('Cog Loaded: guilds')
+        logger.info('Cog Loaded: guilds')
         self.bot = bot
 
     def load_defaults(self, directory=None):

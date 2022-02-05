@@ -7,11 +7,14 @@ import os
 import asyncio
 import re
 import sys
-sys.path.append('functions')
-import profile_fun as pf
+import functions.profile_fun as pf
+
+import logging
+logger = logging.getLogger()
+
 class audio(commands.Cog):
     def __init__(self, bot):
-        print('Cog Loaded: audio')
+        logger.info('Cog Loaded: audio')
         self.bot = bot
 
     @commands.command()
@@ -63,7 +66,7 @@ class audio(commands.Cog):
             for part in args:
                 string += part
                 string += ' '
-            print(args,string)
+            logger.info(args,string)
             filePath = 'audio/clips/say.mp3'
             self.generate_audio(string,filePath)
             await self.play_audio(channel,filePath,volume=0.5,length=5)
@@ -78,7 +81,7 @@ class audio(commands.Cog):
             string += part
             string += ' '
         channel = self.find_voicechat(ctx)
-        print(args,string)
+        logger.info(args,string)
         filePath = 'audio/clips/say.mp3'
         try:
             self.generate_audio(string,filePath,lang)
@@ -94,7 +97,7 @@ class audio(commands.Cog):
 
         if ctx.message.attachments:
 
-            print(ctx.message.attachments[0].filename)#,ctx.message['filename'].attachments)
+            logger.info(ctx.message.attachments[0].filename)#,ctx.message['filename'].attachments)
             if ctx.message.attachments[0].filename[-4:] == '.mp3':
                 customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
 
@@ -115,7 +118,7 @@ class audio(commands.Cog):
         if self.bot.voice_clients == []:
             voice = await channel.connect(timeout=1.0)
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(audioFile),volume=volume)
-            voice.play(source,after=lambda e: print('player error: %s' %e) if e else None)
+            voice.play(source,after=lambda e: logger.info('player error: %s' %e) if e else None)
             await asyncio.sleep(length)
             await voice.disconnect()
 

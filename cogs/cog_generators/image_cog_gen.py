@@ -4,13 +4,17 @@ import glob
 
 import os
 
+import logging
+
+logger = logging.getLogger()
+
 '''
 Short script to generate user callable functions to post images onto chat.
 Base code pulled from image_cog_base.py and each image has file create from the
 file name. Callable using !<image_name> command in discord.
 '''
 def generate_images():
-    print('Generating image_cog.py')
+    logger.info('Generating image_cog.py')
 
     imagepath = "images/"
     cogpath = "cogs/"

@@ -2,13 +2,15 @@ from discord.ext import commands
 import os
 import sys
 import inspirobot
-sys.path.append('functions')
-import profile_fun as pf
+import functions.profile_fun as pf
 
+import logging
+
+logger = logging.getLogger()
 
 class general(commands.Cog):
     def __init__(self, bot):
-        print('Cog Loaded: general')
+        logger.info('Cog Loaded: general')
         self.bot = bot
 
     @commands.command()
@@ -17,7 +19,7 @@ class general(commands.Cog):
         try:
             await ctx.message.delete()
         except discord.errors.Forbidden:
-            print("Message could not be deleted: Forbidden Error")
+            logger.info("Message could not be deleted: Forbidden Error")
 
     @commands.command()
     async def roll(self,ctx,*args):

@@ -2,13 +2,17 @@ from discord.ext import commands
 import numpy as np
 import os
 import sys
-sys.path.append('functions')
+
 import discord
-import profile_fun as pf
+import functions.profile_fun as pf
+
+import logging
+
+logger = logging.getLogger()
 
 class users(commands.Cog):
     def __init__(self, bot):
-        print('Cog Loaded: users')
+        logger.info('Cog Loaded: users')
         self.bot = bot
 
     @commands.command()
@@ -29,7 +33,7 @@ class users(commands.Cog):
     async def reset_profile(self,ctx):
         '''Resets all profile settings to defaults the server where command was issued server'''
         dic = {'user_name':member.name,'guild_name':member.guild.name}
-        print('Reseting profile for {user_name} in {guild_name}'.format(**dic))
+        logger.info('Reseting profile for {user_name} in {guild_name}'.format(**dic))
         member = await self.find_supermember(ctx,playerID)
         await self.delete_user(ctx.guild,member)
         await self.generate_user(ctx.guild,member)
@@ -64,7 +68,7 @@ class users(commands.Cog):
             If a super users @mentions a user the user who was @mentioned has their nickanem reset
         '''
         member = await self.find_supermember(ctx,playerID)
-        print(member,type(member))
+        logger.info(member,type(member))
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
         await member.edit(nick=str(oldNickname))
         await ctx.send('Nickname reset to %s for %s'%(oldNickname,member.name))
@@ -111,7 +115,7 @@ class users(commands.Cog):
         member = await self.find_supermember(ctx,playerID)
         oldLength = await self.pull_value(ctx.author.guild,member,'length')
         superuser = await self.check_super(ctx.author.guild,member)
-        #print(length)
+        #logger.info(length)
         if not(superuser):
             length = np.min((length,3.0))
         await self.set_value(ctx.author.guild,member,'length',length)
@@ -198,7 +202,7 @@ class users(commands.Cog):
             The values which the setting is going to be
         '''
         dic = {'guild_id':guild.id,'user_id':member.id,'key':key,'value':value,'user_name':member.name,'guild_name':guild.name}
-        print('Set {key} for {user_name} in {guild_name} to {value}'.format(**dic))
+        logger.info('Set {key} for {user_name} in {guild_name} to {value}'.format(**dic))
         if type(dic['value']) == str:
             await self.bot.db.execute("UPDATE users SET {key} = '{value}' WHERE guild_id = {guild_id} AND user_id = {user_id};".format(**dic))
         else:
@@ -266,7 +270,7 @@ class users(commands.Cog):
             The user who's settings in the server guild will be changed
 
         '''
-        print('Adding User %s to Guild %s'%(member.name,guild.name))
+        logger.info('Adding User %s to Guild %s'%(member.name,guild.name))
 
         await self.bot.db.execute("INSERT INTO users (guild_name, guild_id,user_id,user_name) VALUES ('%s', %d, %d, '%s');"%(guild.name,guild.id,member.id,member.name))
 
