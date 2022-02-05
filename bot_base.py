@@ -12,27 +12,22 @@ import asyncpg
 
 import discord
 from discord.ext import commands
-import importlib
 
 
+from cogs.cog_generators.image_cog_gen import generate_images
+generate_images()
 
-sys.path.append('cogs')
-from base_cog import base
-from audio_cog import audio
-from image_cog import images
-from user_cog import users
-from guild_cog import guilds
-from general_cog import general
-sys.path.append('cogs/cog_generators')
-from image_cog_gen import generate_images
-sys.path.append('functions')
-import profile_fun as pf
-#from profile_fun import load_defaults
+from cogs.base_cog import base
+from cogs.audio_cog import audio
+from cogs.image_cog import images
+from cogs.user_cog import users
+from cogs.guild_cog import guilds
+from cogs.general_cog import general
+
+import functions.profile_fun as pf
+from functions.logging import configure_logger
 
 async def run(TOKENS):
-    generate_images()
-    importlib.reload(sys.modules['image_cog'])
-    from image_cog import images
     credentials = {"user": TOKENS["SQL_USER"], "password": TOKENS["SQL_PASS"], "database": TOKENS["SQL_DB"], "host": TOKENS["host"]}
     db = await asyncpg.create_pool(**credentials)
 
@@ -85,7 +80,7 @@ if __name__ == "__main__":
     env = ['DISCORD_TOKEN','SQL_USER','SQL_PASS','SQL_DB','host']
 
     TOKENS = {}
-
+    
     for key in env:
         TOKENS[key] = os.getenv(key)
 
