@@ -1,16 +1,21 @@
 #ignore
-audio/*
+*.mp3
+*.png
+*.tif
+*.jpeg
+*.jpg
+data/audio/*
 logs/*
 settings/*
-images/*
+data/images/*
 cogs/image_cog.py
 !settings/default_settings.dat
-!audio/.gitkeep
+!data/audio/.gitkeep
 !logs/.gitkeep
 !logs/nicknames/.gitkeep
 
 !settings/.gitkeep
-!images/.gitkeep
+!data/images/.gitkeep
 .env
 # Byte-compiled / optimized / DLL files
 __pycache__/
