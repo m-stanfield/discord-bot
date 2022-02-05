@@ -1,7 +1,6 @@
 
 import numpy as np
 import glob
-import argparse
 
 import os
 
@@ -13,16 +12,12 @@ file name. Callable using !<image_name> command in discord.
 def generate_images():
     print('Generating image_cog.py')
 
-    parser = argparse.ArgumentParser(description="Sets runtime settings for discord bot")
-    parser.add_argument('--basepath', type=str,default='cogs/cog_base')
-    parser.add_argument('--imagepath', type=str,default='images/')
-    parser.add_argument('--cogpath', type=str,default='cogs/')
-
-    args = parser.parse_args()
-
-    pathList = glob.glob(args.imagepath + '*.png')
-    pathList = glob.glob(args.imagepath + '*.gif') + pathList
-    pathList = glob.glob(args.imagepath + '*.jpg') + pathList
+    imagepath = "images/"
+    cogpath = "cogs/"
+    basepath = "cogs/cog_base"
+    pathList = glob.glob(imagepath + '*.png')
+    pathList = glob.glob(imagepath + '*.gif') + pathList
+    pathList = glob.glob(imagepath + '*.jpg') + pathList
     fileList = []
     longestLen = 0
     lengths = []
@@ -51,7 +46,7 @@ def generate_images():
     string = ''
 
 
-    with open(args.basepath + '/image_cog_base.py','r') as f:
+    with open(basepath + '/image_cog_base.py','r') as f:
         string = f.read()
     string += '\n\n'
 
