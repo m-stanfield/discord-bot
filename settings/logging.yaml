@@ -1,0 +1,89 @@
+---
+version: 1
+disable_existing_loggers: False
+formatters:
+  simple:
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    formatter: simple
+    stream: ext://sys.stdout
+
+
+  root_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG 
+    formatter: simple
+    filename: logs/root.log
+    maxBytes: 10485760 # 10MB
+    backupCount: 20
+    encoding: utf8
+
+  info_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG
+    formatter: simple
+    filename: logs/info.log
+    maxBytes: 10485760 # 10MB
+    backupCount: 20
+    encoding: utf8
+
+  discord_file_handler:
+    class: logging.handlers.RotatingFileHandler
+    level: DEBUG 
+    formatter: simple
+    filename: logs/discord.log
+    maxBytes: 10485760 # 10MB
+    backupCount: 20
+    encoding: utf8
+
+
+loggers:
+    __main__:
+        level: INFO
+        handlers: [console, info_file_handler]
+        propagate: no
+    
+    cogs.base_cog:
+        level: INFO
+        handlers: [console, info_file_handler]
+        propagate: no
+
+    cogs.general_cog:
+        level: INFO
+        handlers: [console, info_file_handler]
+        propagate: no
+    
+    cogs.audio_cog:
+        level: INFO
+        handlers: [console, info_file_handler]
+        propagate: no
+
+    cogs.image_cog:
+        level: INFO
+        handlers: [console, info_file_handler]
+        propagate: no
+
+    cogs.guild_cog:
+        level: INFO
+        handlers: [console, info_file_handler]
+        propagate: no
+
+    cogs.user_cog:
+        level: INFO
+        handlers: [console, info_file_handler]
+        propagate: no
+
+    discord:
+        level: DEBUG
+        handlers: [console, discord_file_handler]
+        propagate: no
+
+
+root:
+  level: INFO 
+  handlers: [console, root_file_handler]
+
