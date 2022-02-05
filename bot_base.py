@@ -78,18 +78,23 @@ if __name__ == "__main__":
     load_dotenv()
 
 
-    setup_logging()
     
-    logger.info("~~~~~~~~NEW LOG~~~~~~~~")
-    logger.info("Discord Bot initialized")
-
+    
     parser = argparse.ArgumentParser(description="Sets runtime settings for discord bot")
     parser.add_argument('--TEST_MODE', type=int,default=0)
     parser.add_argument('--UPDATE_ALL',type=int,default=1)
     parser.add_argument('--DISABLE_WAKEUP',type=int,default=0)
     parser.add_argument('--TEST_LOAD', type=int, default=0)
-
+    parser.add_argument('--LOG', type=int, default=0)
     args = parser.parse_args()
+
+    
+
+    setup_logging(mode=args.LOG)
+    
+    logger.info("~~~~~~~~NEW LOG~~~~~~~~")
+    logger.info("Discord Bot initialized")
+
 
     env = ["DISCORD_TOKEN","SQL_USER","SQL_PASS","SQL_DB","host","LOG_CFG"]
     TOKENS = {}
