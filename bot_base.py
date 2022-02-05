@@ -29,22 +29,6 @@ sys.path.append('functions')
 import profile_fun as pf
 #from profile_fun import load_defaults
 
-load_dotenv()
-parser = argparse.ArgumentParser(description="Sets runtime settings for discord bot")
-parser.add_argument('--TEST_MODE', type=int,default=0)
-parser.add_argument('--UPDATE_ALL',type=int,default=1)
-parser.add_argument('--DISABLE_WAKEUP',type=int,default=0)
-
-args = parser.parse_args()
-
-#grant all privileges on database server_settings to discordbot;
-env = ['DISCORD_TOKEN','SQL_USER','SQL_PASS','SQL_DB','host']
-
-TOKENS = {}
-
-for key in env:
-    TOKENS[key] = os.getenv(key)
-
 async def run(TOKENS):
     generate_images()
     importlib.reload(sys.modules['image_cog'])
@@ -84,6 +68,31 @@ class Bot(commands.Bot):
         )
 
         self.db = kwargs.pop("db")
-while True:
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(run(TOKENS))
+
+if __name__ == "__main__":
+    
+
+    load_dotenv()
+    parser = argparse.ArgumentParser(description="Sets runtime settings for discord bot")
+    parser.add_argument('--TEST_MODE', type=int,default=0)
+    parser.add_argument('--UPDATE_ALL',type=int,default=1)
+    parser.add_argument('--DISABLE_WAKEUP',type=int,default=0)
+    parser.add_argument('--TEST_LOAD', type=int, default=0)
+
+    args = parser.parse_args()
+
+    #grant all privileges on database server_settings to discordbot;
+    env = ['DISCORD_TOKEN','SQL_USER','SQL_PASS','SQL_DB','host']
+
+    TOKENS = {}
+
+    for key in env:
+        TOKENS[key] = os.getenv(key)
+
+    if args.TEST_LOAD == 1:
+        print("Load was successful")
+        exit()
+
+    while True:
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(run(TOKENS))
