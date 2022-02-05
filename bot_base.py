@@ -9,6 +9,7 @@ import os
 import numpy as np
 import glob
 import asyncpg
+import logging
 
 import discord
 from discord.ext import commands
@@ -25,10 +26,17 @@ from cogs.guild_cog import guilds
 from cogs.general_cog import general
 
 import functions.profile_fun as pf
-from functions.logging import configure_logger
+from functions.logging import setup_logging
+
+
+logger = logging.getLogger(__name__)
+
 
 async def run(TOKENS):
-    credentials = {"user": TOKENS["SQL_USER"], "password": TOKENS["SQL_PASS"], "database": TOKENS["SQL_DB"], "host": TOKENS["host"]}
+    credentials = {"user": TOKENS["SQL_USER"], 
+                   "password": TOKENS["SQL_PASS"],
+                   "database": TOKENS["SQL_DB"],
+                   "host": TOKENS["host"]}
     db = await asyncpg.create_pool(**credentials)
 
     # Example create table code, you'll probably change it to suit you
@@ -46,12 +54,12 @@ async def run(TOKENS):
     bot.add_cog(images(bot))
     bot.add_cog(guilds(bot))
 
-    print('Using Database: ',bot.db)
+    logger.info(f'Using Database: {bot.db}')
     try:
         await bot.start(TOKENS["DISCORD_TOKEN"])
     except KeyboardInterrupt:
         await db.close()
-        print('exiting loop')
+        logger.info("KeyboardInterrupt: Exiting Program")
         await bot.logout()
 
 class Bot(commands.Bot):
@@ -68,6 +76,13 @@ if __name__ == "__main__":
     
 
     load_dotenv()
+
+
+    setup_logging()
+    
+    logger.info("~~~~~~~~NEW LOG~~~~~~~~")
+    logger.info("Discord Bot initialized")
+
     parser = argparse.ArgumentParser(description="Sets runtime settings for discord bot")
     parser.add_argument('--TEST_MODE', type=int,default=0)
     parser.add_argument('--UPDATE_ALL',type=int,default=1)
@@ -76,18 +91,22 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    #grant all privileges on database server_settings to discordbot;
-    env = ['DISCORD_TOKEN','SQL_USER','SQL_PASS','SQL_DB','host']
-
+    env = ["DISCORD_TOKEN","SQL_USER","SQL_PASS","SQL_DB","host","LOG_CFG"]
     TOKENS = {}
     
     for key in env:
-        TOKENS[key] = os.getenv(key)
+        try:
+            TOKENS[key] = os.getenv(key)
+        except KeyError:
+            logger.error(f"Invalid enrivoment key on load: {key}")
 
+    
+
+    run_state = True
     if args.TEST_LOAD == 1:
-        print("Load was successful")
-        exit()
-
-    while True:
+        logger.info("Load was successful. Due to test load being enabled program will now exit.")
+        run_state = False
+ 
+    while run_state:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(run(TOKENS))

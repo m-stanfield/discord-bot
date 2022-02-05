@@ -12,7 +12,7 @@ import asyncio
 
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 class base(commands.Cog):
     #Base function mainly interact through listeners and responding to server events.

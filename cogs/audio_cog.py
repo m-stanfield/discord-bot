@@ -10,7 +10,8 @@ import sys
 import functions.profile_fun as pf
 
 import logging
-logger = logging.getLogger()
+
+logger = logging.getLogger(__name__)
 
 class audio(commands.Cog):
     def __init__(self, bot):

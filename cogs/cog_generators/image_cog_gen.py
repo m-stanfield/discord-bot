@@ -6,7 +6,7 @@ import os
 
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 
 '''
 Short script to generate user callable functions to post images onto chat.
