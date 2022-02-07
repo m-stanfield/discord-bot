@@ -15,6 +15,7 @@ cogs/image_cog.py
 !logs/nicknames/.gitkeep
 
 !settings/.gitkeep
+!settings/logging.yaml
 !data/images/.gitkeep
 .env
 # Byte-compiled / optimized / DLL files

@@ -6,6 +6,8 @@ import logging.config
 
 import yaml
 
+logger = logging.getLogger(__name__)
+
 def setup_logging(
     path:str=None,
     mode:int=None,
@@ -14,7 +16,8 @@ def setup_logging(
     """Setup logging configuration
 
     """
-    mode_dict = {0:"INFO",1:"DEBUG"}
+    
+    mode_dict = {None:None, 0:"INFO",1:"DEBUG"}
     level = mode_dict[0] if mode not in mode_dict else mode_dict[mode]
     
     path = path or "logging.yaml"
@@ -31,12 +34,15 @@ def setup_logging(
 
     
         for key in config["loggers"]:
-            config['loggers'][key]['level'] = level
+            config['loggers'][key]['level'] = level or config['loggers'][key]['level']
         logging.config.dictConfig(config)
     else:
         raise IOError(f"Logging configuration file does not exist. Expected file at location: {path}")
     
-
+    logger.info("Logger loaded")
+    logger.info("config file used: " + path)
+    logger.info("  override level: " + str(level))
+    logger.info("         env key: " + str(env_key)) 
 
 if __name__ == "__main__":
     print(os.getcwd())

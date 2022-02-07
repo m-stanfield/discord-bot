@@ -135,7 +135,7 @@ class audio(commands.Cog):
         myobj.save(path)
 
 
-    def find_member_audio(self,member,default_audio,directory='audio/users/'):
+    def find_member_audio(self,member,default_audio,directory='data/audio/users/'):
         audiofile = ''
 
         customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'

@@ -26,7 +26,7 @@ from cogs.guild_cog import guilds
 from cogs.general_cog import general
 
 import functions.profile_fun as pf
-from functions.logging import setup_logging
+from functions.program_logging import setup_logging
 
 
 logger = logging.getLogger(__name__)
@@ -88,11 +88,11 @@ if __name__ == "__main__":
     parser.add_argument('--UPDATE_ALL',type=int,default=1)
     parser.add_argument('--DISABLE_WAKEUP',type=int,default=0)
     parser.add_argument('--TEST_LOAD', type=int, default=0)
-    parser.add_argument('--LOG', type=int, default=0)
+    parser.add_argument('--LOG', type=int, default=None)
     args = parser.parse_args()
 
+    logging_message = "Logging Mode Picked: " + str(args.LOG)
     
-
     setup_logging(mode=args.LOG)
     
     logger.info("~~~~~~~~NEW LOG~~~~~~~~")
