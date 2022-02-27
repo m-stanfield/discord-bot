@@ -3,12 +3,12 @@ version: 1
 disable_existing_loggers: False
 formatters:
   simple:
-    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    format: "%(asctime)s - %(module)s - %(name)s - %(levelname)s - %(message)s"
 
 handlers:
   console:
     class: logging.StreamHandler
-    level: INFO
+    level: DEBUG
     formatter: simple
     stream: ext://sys.stdout
 
@@ -53,46 +53,6 @@ handlers:
 
 loggers:
     __main__:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-    
-    cogs.base_cog:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-
-    cogs.general_cog:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-    
-    cogs.audio_cog:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-
-    cogs.image_cog:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-
-    cogs.guild_cog:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-
-    cogs.user_cog:
-        level: INFO
-        handlers: [console, info_file_handler, error_file_handler]
-        propagate: no
-
-    discord:
-        level: INFO 
-        handlers: [console, discord_file_handler, error_file_handler]
-        propagate: no
-
-    program_logging:
         level: INFO
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
