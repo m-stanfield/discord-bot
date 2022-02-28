@@ -42,7 +42,7 @@ class AudioGen:
 if __name__ == "__main__":
     gen = AudioGen(base_path='data/audio/tests/')
     gen.generateTTS('test', 'abcdefghijklmnopqrstuvwxyz')
-    gen.generateNickname('thadis', 'thadis, nickname', 1,2)
+    gen.generateNickname('testname', 'thadis, nickname', 1,2)
     gen.setKwargs(tld='co.in')
     gen.generateTTS('test', 'Hello, how are you')
 
