@@ -7,9 +7,7 @@ from src.logging.logger import Logger
 
 logger = Logger(__name__)
 
-
-
-
+Settings.init()
 class DiscordBot(discord.Bot):
 
     DEFAULT_KWARGS = {'description':"default description","command_prefix":"!","intents":None}
@@ -27,7 +25,7 @@ class DiscordBot(discord.Bot):
         db:DataBase = None if "db" not in kwargs else kwargs.pop('db')
         print(db)
         if not(isinstance(db,DataBase)):
-            db = DataBase(path=kwargs.get('SQLITE_DB'))
+            db = DataBase(path=Settings.get('SQLITE_DB'))
         self.db = db
     
     async def run(self):

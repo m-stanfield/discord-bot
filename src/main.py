@@ -7,9 +7,9 @@ import os
 from misc.Settings import Settings
 # globals
 logger = Logger(__name__)
+Settings.init()
 
 async def main():
-    Settings.init()
     startup_message = "Discord Bot Startup Began"
     buffer_size = 30
     startup_message = "~"*buffer_size + startup_message + "~"*buffer_size
@@ -18,7 +18,7 @@ async def main():
     logger.info('~'*len(startup_message))
     Settings.log()
 
-    bot = DiscordBot(SQLITE_DB=Settings.get('SQLITE_DB'))
+    bot = DiscordBot()
 
     run_state = True
     if Settings.get('TEST_LOAD') == 1:

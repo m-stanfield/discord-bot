@@ -53,11 +53,37 @@ handlers:
 
 loggers:
     __main__:
-        level: INFO
+        level: DEBUG
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
 
+    DiscordBot:
+        level: DEBUG
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+      
+    misc.Settings:
+        level: DEBUG
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+    misc.Settings:
+        level: DEBUG
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+    logging.Logger:
+        level: DEBUG
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+        
+    database.DataBase:
+        level: DEBUG
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+
 root:
   level: INFO 
-  handlers: [console, root_file_handler, error_file_handler]
+  handlers: [root_file_handler, error_file_handler]
 

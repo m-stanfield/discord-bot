@@ -5,7 +5,7 @@ from sqlalchemy import text
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import create_async_engine
 logger = Logger(__name__)
-
+Settings.init()
 
 class DataBase:
     #DEFAULT_KWARGS = {'path':':memory:'}#

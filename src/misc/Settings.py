@@ -23,7 +23,10 @@ class Settings:
 
     @classmethod
     def init(cls):
+        logger.info("init")
+
         if cls.settings is None:
+            logger.info("Initializaing settings")
             cls.settings = {}
             cls._load_env()
             cls._parseArgs()
