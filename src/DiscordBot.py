@@ -7,7 +7,6 @@ from src.logging.logger import Logger
 
 logger = Logger(__name__)
 
-SETTINGS = Settings()
 
 
 
@@ -33,7 +32,7 @@ class DiscordBot(discord.Bot):
     
     async def run(self):
         try:
-            await self.start(SETTINGS.get("DISCORD_TOKEN"))
+            await self.start(Settings.get("DISCORD_TOKEN"))
         except KeyboardInterrupt:
             logger.info("KeyboardInterrupt: Exiting Program")
             await self.db.close()
@@ -44,8 +43,8 @@ class DiscordBot(discord.Bot):
 
 if __name__ == "__main__":
     async def main():
-        print(SETTINGS.get('SQLITE_DB'))
-        bot = DiscordBot(SQLITE_DB=SETTINGS.get('SQLITE_DB'))
+        print(Settings.get('SQLITE_DB'))
+        bot = DiscordBot(SQLITE_DB=Settings.get('SQLITE_DB'))
         await bot.run()
 
     asyncio.run(main())
