@@ -6,7 +6,6 @@
 *.jpg
 data/audio/*
 logs/*
-settings/*
 data/images/*
 cogs/image_cog.py
 !settings/default_settings.dat
