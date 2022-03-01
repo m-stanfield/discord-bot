@@ -3,5 +3,6 @@
     "python.analysis.extraPaths": [
         "${workspaceFolder}/"
     ],
-    "python.envFile": "${workspaceFolder}/"
+    "python.envFile": "${workspaceFolder}/",
+    "python.terminal.activateEnvInCurrentTerminal": true
 }
