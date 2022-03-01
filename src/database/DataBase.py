@@ -15,6 +15,7 @@ class DataBase:
         self._kwargs = {**self.DEFAULT_KWARGS, **kwargs}
         if self.db is None:
             self.db = create_async_engine("sqlite+aiosqlite:///"+self._kwargs['path'])
+            self.initialize()
             logger.info(f"Data has been loaded from : {self._kwargs['path']}")
 
     async def close(self):
@@ -29,7 +30,7 @@ class DataBase:
             await conn.execute(text(command))
 
 
-    async def creatTable(self, tableName, columns, column_types=None):
+    async def createTable(self, tableName, columns, column_types=None, column_defaults=None):
         # schema_list is tuple/list of tuples/lists of keyword/datatype pairs
         # so ((user_name, text))
         if column_types is not None and not(len(columns) == len(column_types)):
@@ -37,12 +38,10 @@ class DataBase:
             logger.error(errormsg)
             raise ValueError(errormsg)
 
-        column_args = []
-
-        for i in range(len(columns)):
-            column_args.append(columns[i])
-            if column_types is not None:
-                column_args.append(column_types[i])
+        if column_defaults is not None and not(len(columns) == len(column_defaults)):
+            errormsg = "Column name and s arrays need to have the same length"
+            logger.error(errormsg)
+            raise ValueError(errormsg)
 
         # generate command string for creating a table
         cmdstr = f"CREATE TABLE if not exists {tableName} ("
@@ -57,6 +56,9 @@ class DataBase:
             # if column datatype is given, add ? for its position
             if column_types is not None:
                 cmdstr += f" {column_types[i]}"
+
+            if column_defaults is not None:
+                cmdstr += f" DEFAULT {column_defaults[i]}"
         cmdstr += ")"
 
         await self.execute(cmdstr)
@@ -89,13 +91,17 @@ class DataBase:
         return True
 
 
+    async def initialize(self):
+        pass
+
+
 
 if __name__ == "__main__":
     async def main():
         db = DataBase()
         tableName = 'async_table'
-        await db.creatTable(tableName, columns=['a', 'b', 'c'], column_types=[
+        await db.createTable(tableName, columns=['a', 'b', 'c'], column_types=[
                     'int', 'real', 'text'])
-        await db.insert(tableName, columns=['a', 'b', 'c'], values=[1, 1.0, 'abcd'])
+        await db.insert(tableName, columns=['a', 'b', 'c'], values=[1, "", 'abcd'])
         await db.close()
     asyncio.run(main())
