@@ -6,15 +6,12 @@ from src.logging.logger import Logger
 
 logger = Logger(__name__)
 
-
 class Settings:
     settings: dict | None = None
 
     def __init__(self):
-        if self.settings is None:
-            self.settings = {}
-            self._load_env()
-            self._parseArgs()
+        self.init()
+
 
     def __str__(self):
         output = ""
@@ -24,45 +21,60 @@ class Settings:
             output += self._key2Str(key)
         return output
 
-    def get(self, key: str):
-        return self.settings[key]
+    @classmethod
+    def init(cls):
+        if cls.settings is None:
+            cls.settings = {}
+            cls._load_env()
+            cls._parseArgs()
+            cls._loadSchema()
 
-    def getSettings(self):
-        return dict(self.settings)
+    @classmethod
+    def get(cls, key: str):
+        return cls.settings[key]
 
-    def getKeys(self):
-        return self.settings.keys()
+    @classmethod
+    def getSettings(cls):
+        return dict(cls.settings)
 
-    def keys(self):
-        return self.getKeys()
+    @classmethod
+    def getKeys(cls):
+        return cls.settings.keys()
 
-    def _key2Str(self, key:str)->str:
+    @classmethod
+    def keys(cls):
+        return cls.getKeys()
+
+    @classmethod
+    def _key2Str(cls, key:str)->str:
         output:str
         if key.endswith("TOKEN"):
             output = f"{key}: REDACTED"
         else:
-            output = f"{key}: {self.settings[key]}"
+            output = f"{key}: {cls.settings[key]}"
         return output
 
-    def log(self):
+    @classmethod
+    def log(cls):
         logger.info("Logging discord bot initilization settings")
         key:str
-        for key in self.settings:
-            logger.info(self._key2Str(key))
+        for key in cls.settings:
+            logger.info(cls._key2Str(key))
 
-
-    def _load_env(self):
+    @classmethod
+    def _load_env(cls):
         dotenv.load_dotenv()
 
         env = ["DISCORD_TOKEN", "SQLITE_DB"]
 
         for key in env:
             try:
-                self.settings[key] = os.getenv(key)
+                cls.settings[key] = os.getenv(key)
             except KeyError:
                 logger.error(f"Invalid enrivoment key on load: {key}")
-
-    def _parseArgs(self):
+    
+    @classmethod
+    def _parseArgs(cls):
         parser = argparse.ArgumentParser(
             description="Sets runtime settings for discord bot")
         parser.add_argument('--TEST_MODE', type=int, default=0)
@@ -73,9 +85,63 @@ class Settings:
         args = parser.parse_args()
 
         for key in vars(args):
-            self.settings[key] = vars(args)[key]
+            cls.settings[key] = vars(args)[key]
+
+    @classmethod
+    def _loadSchema(cls):
+        iniName = ['guild_defaults','user_defaults']
+        iniExtension = '.ini'
+        iniPath = 'settings/database/'
+        if not(os.path.isdir(iniPath)):
+            errmsg = "Directory {iniPath} does not exist for the database initialization settings"
+            logger.error(errmsg)
+            raise FileNotFoundError(errmsg)
+        db_dic = {}
+        for fileName in iniName:
+            path = iniPath + fileName + iniExtension
+            if os.path.exists(path):
+                with open(path,'r') as f:
+                    content = f.readlines()
+
+
+                content = [x.strip().replace('\t','').replace(' ','')  for x in content]
+                dic = {}
+                for line in content:
+                    if len(line) > 0:
+                        a = line.split('=')
+                        varname = a[0]
+                        vartype = a[1].split(':')[0]
+                        varval = a[1].split(':')[1]
+
+
+
+                        if vartype == 'BOOL':
+                            dic[a[0]] = ('BOOL',bool(int(varval)))
+                        elif vartype == 'TEXT':
+                            dic[a[0]] = ('TEXT',varval.replace('"',"'"))
+                        elif vartype == 'FLOAT':
+                            dic[a[0]] = ('FLOAT',float(varval))
+                        elif vartype == 'BIGINT':
+                            dic[a[0]] = ('BIGINT',int(varval))
+                        else:
+                            try:
+                                dic[a[0]] = ('BIGINT',int(varval))
+                            except ValueError:
+                                dic[a[0]] = ('TEXT',str(varval))
+                db_dic[f'{fileName}'.replace('_defaults',"").upper()] = dic
+
+        cls.settings['DATA_BASE'] = db_dic  
+
+    
+
+
+
+
+
+
+
 
 if __name__ == "__main__":
-    SETTINGS = Settings()
-    print(SETTINGS)
+    Settings.init() 
+    print(Settings)
 

@@ -1,4 +1,5 @@
 from src.logging.logger import Logger
+from src.misc.Settings import Settings
 import asyncio
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -8,14 +9,13 @@ logger = Logger(__name__)
 
 class DataBase:
     #DEFAULT_KWARGS = {'path':':memory:'}#
-    DEFAULT_KWARGS = {'path': 'data/database/discord_bot.db'}
+    DEFAULT_KWARGS = {'path': 'data/database/discord_bot.db','schema_path':'settings/database/schema'}
     db:Engine|None = None
 
     def __init__(self, **kwargs):
         self._kwargs = {**self.DEFAULT_KWARGS, **kwargs}
         if self.db is None:
             self.db = create_async_engine("sqlite+aiosqlite:///"+self._kwargs['path'])
-            self.initialize()
             logger.info(f"Data has been loaded from : {self._kwargs['path']}")
 
     async def close(self):
@@ -91,17 +91,27 @@ class DataBase:
         return True
 
 
-    async def initialize(self):
-        pass
+    async def init(self):
+        db_settings = Settings.get('DATA_BASE')
+        print(db_settings)
+        for key in db_settings:
+            columns = []
+            column_types = []
+            column_defaults = []
+            for elemName,(elemType, elemDefault) in db_settings[key].items():
+                columns.append(elemName)
+                column_types.append(elemType)
+                column_defaults.append(elemDefault)
+                print(key,elemName, elemDefault,elemType)
+            print(key)
+            await self.createTable(key.lower(), columns, column_types=column_types, column_defaults=column_defaults)
 
 
 
 if __name__ == "__main__":
+    Settings()
     async def main():
         db = DataBase()
-        tableName = 'async_table'
-        await db.createTable(tableName, columns=['a', 'b', 'c'], column_types=[
-                    'int', 'real', 'text'])
-        await db.insert(tableName, columns=['a', 'b', 'c'], values=[1, "", 'abcd'])
+        await db.init()
         await db.close()
     asyncio.run(main())
