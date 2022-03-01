@@ -148,3 +148,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 data/database/discord_bot.db
+src/pycord_tests/slash_command_example.py
+src/database/examples/test_sqlite3.py
