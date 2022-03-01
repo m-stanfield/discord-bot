@@ -1,37 +1,35 @@
-import sqlite3
 from src.logging.logger import Logger
-
+import asyncio
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
+from sqlalchemy.ext.asyncio import create_async_engine
 logger = Logger(__name__)
 
 
 class DataBase:
     #DEFAULT_KWARGS = {'path':':memory:'}#
     DEFAULT_KWARGS = {'path': 'data/database/discord_bot.db'}
-    db = None
+    db:Engine|None = None
 
     def __init__(self, **kwargs):
         self._kwargs = {**self.DEFAULT_KWARGS, **kwargs}
         if self.db is None:
-            self.db = sqlite3.connect(self._kwargs['path'])
+            self.db = create_async_engine("sqlite+aiosqlite:///"+self._kwargs['path'])
             logger.info(f"Data has been loaded from : {self._kwargs['path']}")
 
-    def exit(self):
+    async def close(self):
         logger.info(f"Attempting to close database")
-        self.db.close()
+        await self.db.dispose()
         logger.info(f"Database was successfully closed")
 
 
-    def execute(self, command, args=None):
+    async def execute(self, command, args=None):
         logger.debug(f"SQL Command: {command}")
+        async with self.db.begin() as conn:
+            await conn.execute(text(command))
 
-        cur = self.db.cursor()
-        if args is None:
-            cur.execute(command)
-        else:
-            logger.debug(f"With args: {args}")
-            cur.execute(command, args)
 
-    def creatTable(self, tableName, columns, column_types=None):
+    async def creatTable(self, tableName, columns, column_types=None):
         # schema_list is tuple/list of tuples/lists of keyword/datatype pairs
         # so ((user_name, text))
         if column_types is not None and not(len(columns) == len(column_types)):
@@ -61,10 +59,10 @@ class DataBase:
                 cmdstr += f" {column_types[i]}"
         cmdstr += ")"
 
-        self.execute(cmdstr)
+        await self.execute(cmdstr)
         return True
 
-    def insert(self, table: str, columns: list, values: list) -> bool:
+    async def insert(self, table: str, columns: list, values: list) -> bool:
         if not(len(columns) == len(values)):
             return False
 
@@ -85,16 +83,19 @@ class DataBase:
                 cmdstr += str(elem)
         cmdstr += ")"
 
-        self.execute(cmdstr)
+        await self.execute(cmdstr)
 
 
         return True
 
 
+
 if __name__ == "__main__":
-    db = DataBase()
-    tableName = 'abcde'
-    db.creatTable(tableName, columns=['a', 'b', 'c'], column_types=[
-                  'int', 'real', 'text'])
-    db.insert(tableName, columns=['a', 'b', 'c'], values=[1, 1.0, 'abcd'])
-    db.exit()
+    async def main():
+        db = DataBase()
+        tableName = 'async_table'
+        await db.creatTable(tableName, columns=['a', 'b', 'c'], column_types=[
+                    'int', 'real', 'text'])
+        await db.insert(tableName, columns=['a', 'b', 'c'], values=[1, 1.0, 'abcd'])
+        await db.close()
+    asyncio.run(main())
