@@ -58,7 +58,7 @@ class users(commands.Cog):
         member = await self.find_supermember(ctx,playerID)
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
         await self.set_value(ctx.author.guild,member,'default_nickname',nickname)
-        await ctx.send('Default Nickname set from %s to %s for %s'%(oldNickname,nickname,member.name))
+        await ctx.respond('Default Nickname set from %s to %s for %s'%(oldNickname,nickname,member.name))
 
     @commands.command()
     async def reset_nickname(self, ctx, playerID=None):
@@ -71,7 +71,7 @@ class users(commands.Cog):
         logger.info(member,type(member))
         oldNickname = await self.pull_value(ctx.author.guild,member,'default_nickname')
         await member.edit(nick=str(oldNickname))
-        await ctx.send('Nickname reset to %s for %s'%(oldNickname,member.name))
+        await ctx.respond('Nickname reset to %s for %s'%(oldNickname,member.name))
 
     @commands.command()
     async def volume(self, ctx,volume: float,playerID=None):
@@ -85,7 +85,7 @@ class users(commands.Cog):
         member = await self.find_supermember(ctx,playerID)
         oldVolume = await self.pull_value(ctx.author.guild,member,'volume')
         await self.set_value(ctx.author.guild,member,'volume',volume)
-        await ctx.send('Volume set from %0.3f to %0.3f for %s'%(oldVolume,volume,member.name))
+        await ctx.respond('Volume set from %0.3f to %0.3f for %s'%(oldVolume,volume,member.name))
 
     @commands.command()
     async def custom_audio(self, ctx,custom_audio: float,playerID=None):
@@ -99,7 +99,7 @@ class users(commands.Cog):
         member = await self.find_supermember(ctx,playerID)
         oldcustom_audio = await self.pull_value(ctx.author.guild,member,'custom_audio')
         await self.set_value(ctx.author.guild,member,'custom_audio',custom_audio)
-        await ctx.send('custom_audio set from %0.2f to %0.2f for %s'%(oldcustom_audio,custom_audio,member.name))
+        await ctx.respond('custom_audio set from %0.2f to %0.2f for %s'%(oldcustom_audio,custom_audio,member.name))
 
     @commands.command()
     async def length(self, ctx,length: float,playerID=None):
@@ -119,7 +119,7 @@ class users(commands.Cog):
         if not(superuser):
             length = np.min((length,3.0))
         await self.set_value(ctx.author.guild,member,'length',length)
-        await ctx.send('Length set from %0.3f to %0.3f for %s'%(oldLength,length,member.name))
+        await ctx.respond('Length set from %0.3f to %0.3f for %s'%(oldLength,length,member.name))
 
     @commands.command()
     async def solo_play(self,ctx,playerID=None):
@@ -144,9 +144,9 @@ class users(commands.Cog):
         '''
         member = await self.find_supermember(ctx,playerID)
 
-        mainRow = await self.bot.db.fetchrow("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(ctx.author.guild.id,member.id))
+        mainRow = await self.bot.db.select("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(ctx.author.guild.id,member.id))
 
-        allRow = await self.bot.db.fetch("SELECT * FROM users WHERE user_id = %d"%(member.id))
+        allRow = await self.bot.db.select("SELECT * FROM users WHERE user_id = %d"%(member.id))
 
         for row in allRow:
             for key in dict(row):
@@ -178,7 +178,7 @@ class users(commands.Cog):
             string += ' '*(maxKey-curKey) + key + ':  ' + str(settings[key]) + '\n'
         string += '```'
 
-        await ctx.author.send(string)
+        await ctx.author.respond(string)
         #await self.set_value(ctx.author.guild,member,'solo_play',val==0)
 
     async def check_super(self,guild,member):
@@ -243,7 +243,7 @@ class users(commands.Cog):
         testRow
             The values of the users settings
         '''
-        testRow = await self.bot.db.fetchrow("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(guild.id,member.id))
+        testRow = await self.bot.db.select("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(guild.id,member.id))
         return testRow
 
     async def delete_user(self,guild,member):
