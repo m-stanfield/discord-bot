@@ -178,7 +178,7 @@ class users(commands.Cog):
             string += ' '*(maxKey-curKey) + key + ':  ' + str(settings[key]) + '\n'
         string += '```'
 
-        await ctx.author.send(string)
+        await ctx.author.respond(string)
         #await self.set_value(ctx.author.guild,member,'solo_play',val==0)
 
     async def check_super(self,guild,member):
@@ -243,7 +243,7 @@ class users(commands.Cog):
         testRow
             The values of the users settings
         '''
-        testRow = await self.bot.db.fetchrow("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(guild.id,member.id))
+        testRow = await self.bot.db.select("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(guild.id,member.id))
         return testRow
 
     async def delete_user(self,guild,member):
