@@ -16,17 +16,13 @@ class general(commands.Cog):
         self.bot = bot
 
     @slash_command()
-    async def inspire(self, ctx, *args):
-        await ctx.send(inspirobot.generate().url)
-        try:
-            await ctx.message.delete()
-        except discord.errors.Forbidden:
-            logger.info("Message could not be deleted: Forbidden Error")
+    async def inspire(self, ctx):
+        await ctx.respond(inspirobot.generate().url)
 
-    @commands.command()
+    @slash_command()
     async def roll(self,ctx,*args):
         '''Rolls dice. !roll <dice string>. Dice string exmaple: 1d20 -4d2 + 8 -2d2'''
-        await ctx.send(pf.roll_dice(args))
+        await ctx.respond(pf.roll_dice(args))
 
 
     @slash_command()
