@@ -178,7 +178,7 @@ class users(commands.Cog):
             string += ' '*(maxKey-curKey) + key + ':  ' + str(settings[key]) + '\n'
         string += '```'
 
-        await ctx.author.respond(string)
+        await ctx.reply(string)
         #await self.set_value(ctx.author.guild,member,'solo_play',val==0)
 
     async def check_super(self,guild,member):
