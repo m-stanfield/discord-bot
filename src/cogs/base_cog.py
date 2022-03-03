@@ -29,12 +29,12 @@ class base(commands.Cog):
         if superuser:
             await self.bot.logout()
 
-    @slash_command(guild_ids=[314669831490371585])
+    @slash_command()
     async def hello(self, ctx):
         await ctx.respond("Hello!")
 
 
-    @slash_command(guild_ids=[314669831490371585])
+    @slash_command()
     async def joined(self,
         ctx, member: discord.Member = None
     ):  # Passing a default value makes the argument optional

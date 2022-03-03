@@ -3,8 +3,10 @@ import os
 import sys
 import inspirobot
 import src.functions.profile_fun as pf
-
+import discord
 import logging
+from discord.commands import slash_command
+
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +15,7 @@ class general(commands.Cog):
         logger.info('Cog Loaded: general')
         self.bot = bot
 
-    @commands.command()
+    @slash_command()
     async def inspire(self, ctx, *args):
         await ctx.send(inspirobot.generate().url)
         try:
@@ -27,9 +29,10 @@ class general(commands.Cog):
         await ctx.send(pf.roll_dice(args))
 
 
-    @commands.command()
-    async def nicknames(self,ctx,playerID=None,length=5):
-        '''Displays users past nicknames on server. !nicknames @<mention> <length>. @<mention> only works for superusers'''
+    @slash_command()
+    async def nicknames(self,ctx,member: discord.Member=None,length:float=5):
+        '''Displays users past nicknames on server.'''
+
         '''
         Inputs
         ------
@@ -40,12 +43,12 @@ class general(commands.Cog):
             length of list generated.
 
         '''
-        await ctx.message.delete()
+       # await ctx.message.delete()
 
         directory='logs/nicknames/'
         users = self.bot.get_cog('users')
         #checking if user is superuser and can change other users settings
-        member = await users.find_supermember(ctx,playerID)
+        member = await users.find_supermember(ctx,member)
 
         #building message strings from file
         message = '~~~~~\n'
@@ -61,4 +64,4 @@ class general(commands.Cog):
                     splitline = lines[-(ii+1)].replace('\n','').split('\t')
 
                     message += splitline[0] + '\t' + splitline[2] +'\n'
-            await ctx.send(message)
+            await ctx.respond(message)

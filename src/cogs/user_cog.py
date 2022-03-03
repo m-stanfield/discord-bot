@@ -316,7 +316,7 @@ class users(commands.Cog):
         for guild in guild_list:
             await self.check_guild(guild)
 
-    async def find_supermember(self,ctx,playerID):
+    async def find_supermember(self,ctx,member:discord.Member|int):
         '''
         Checks to see if user is super user and is allowed to @mention other users.
 
@@ -331,6 +331,8 @@ class users(commands.Cog):
             If user was super user it returns object for the member @mentioned
             If user was not super user it returns the submitters member object
         '''
+
+        playerID = member.id if type(member) is discord.Member else member
         supercheck = await self.check_super(ctx.author.guild,ctx.author)
 
         if supercheck:

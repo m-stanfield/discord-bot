@@ -32,6 +32,8 @@ class Settings:
             cls._parseArgs()
             cls._loadSchema()
 
+
+
     @classmethod
     def get(cls, key: str):
         return cls.settings[key]

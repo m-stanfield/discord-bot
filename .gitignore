@@ -7,7 +7,7 @@
 data/audio/*
 logs/*
 data/images/*
-cogs/image_cog.py
+src/cogs/image_cog.py
 !settings/default_settings.dat
 !data/audio/.gitkeep
 !logs/.gitkeep
