@@ -172,6 +172,7 @@ class base(commands.Cog):
         logger.info('-'*len(done_message))
         logger.info(done_message)
         logger.info('-'*len(done_message))
+        await self.bot.sync_commands()
 
 
 
