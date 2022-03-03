@@ -83,16 +83,16 @@ class base(commands.Cog):
             # TODO: Update to SQL database
             now = datetime.now()
             timestr = now.strftime('%Y/%m/%d  %H:%M:%S')
-            with open('logs/nicknames/' + after.name.replace(' ','_') + '_nicknames_' +after.guild.name.replace(' ','_') +'.dat','a') as f:
+            with open('logs/nicknames/' + audio.clean_string(after.name) + '_nicknames_' +audio.clean_string(after.guild.name) +'.dat','a') as f:
                 f.write(timestr+'\t'+before.display_name + '\t' + after.display_name +'\n')
             # TODO: audio nickname update
 
             #Generating new audio based on updated nickanme
             logger.info('Generating Audio for %s to say %s'%(after.name,after.display_name))
-            defaultfile = 'default_' + after.name +'_'+ str(after.id)+ '_'+ str(after.guild.id) +'.mp3'
+            defaultfile = 'default_' + audio.clean_string(after.name) +'_'+ str(after.id)+ '_'+ str(after.guild.id) +'.mp3'
             logger.info(after.display_name,'data/audio/users/'+defaultfile)
             audio = self.bot.get_cog('audio')
-            audio.generate_audio(after.display_name,'data/audio/users/'+defaultfile)
+            audio.generate_audio(audio.clean_string(after.display_name),'data/audio/users/'+defaultfile)
 
 
     @commands.Cog.listener()
@@ -143,10 +143,10 @@ class base(commands.Cog):
 
                 for member in guild.members:
                     logger.info('Generating Audio for %s to say %s'%(member.name,member.display_name))
-                    defaultfile = 'default_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+                    defaultfile = 'default_' + audio.clean_string(member.name) +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
                     #TODO: Add logic here to check if file already exists with given nickname
                     #Potentially needs to have SQL Table contianing last generated nickname
-                    audio.generate_audio(member.display_name,'data/audio/users/'+defaultfile)
+                    audio.generate_audio(audio.clean_string(member.display_name),'data/audio/users/'+defaultfile)
 
         #Checking all users to make sure they have set settings
         await users.check_all(self.bot.guilds)

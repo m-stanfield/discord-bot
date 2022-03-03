@@ -89,9 +89,9 @@ class audio(commands.Cog):
             await self.play_audio(channel,filePath,volume=0.5,length=3)
         except ValueError:
             a = 1
-
-    def clean_string(self, string):
-        return string.replace("/","_")
+    @staticmethod
+    def clean_string(string):
+        return string.replace("/","_").replace(' ','_')
     @commands.command()
     async def upload_audio(self,ctx,playerID=None):
         '''Upload custom audio track for intro. If .mp3 file is attached it will be associated with your account'''
