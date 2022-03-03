@@ -37,7 +37,12 @@ class DataBase:
  
     async def select(self, cmdstr):
         result = await self.execute(cmdstr)
-        result = result.all()[0]
+        result = result.all()
+
+        logger.info(result)
+        if len(result) > 0:
+            result = result[0]
+        logger.info(result)
         if len(result) == 1:
             result = result[0]
         return result
