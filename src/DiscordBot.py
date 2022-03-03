@@ -5,10 +5,21 @@ from src.misc.Settings import Settings
 
 from src.logging.logger import Logger
 
+from src.cogs.cog_generators.image_cog_gen import generate_images
+generate_images()
+
+from src.cogs.base_cog import base
+from src.cogs.audio_cog import audio
+from src.cogs.image_cog import images
+from src.cogs.user_cog import users
+from src.cogs.guild_cog import guilds
+from src.cogs.general_cog import general
+
+import functions.profile_fun as pf
 logger = Logger(__name__)
 
 Settings.init()
-class DiscordBot(discord.Bot):
+class DiscordBot(discord.ext.commands.Bot):
 
     DEFAULT_KWARGS = {'description':"default description","command_prefix":"!","intents":None}
     def __init__(self, **kwargs):
@@ -27,6 +38,13 @@ class DiscordBot(discord.Bot):
         if not(isinstance(db,DataBase)):
             db = DataBase(path=Settings.get('SQLITE_DB'))
         self.db = db
+        self.add_cog(base(self))
+        self.add_cog(users(self))
+        self.add_cog(general(self))
+        self.add_cog(audio(self))
+        self.add_cog(images(self))
+        self.add_cog(guilds(self))
+
     
     async def run(self):
         try:
@@ -43,6 +61,7 @@ if __name__ == "__main__":
     async def main():
         print(Settings.get('SQLITE_DB'))
         bot = DiscordBot(SQLITE_DB=Settings.get('SQLITE_DB'))
+
         await bot.run()
 
     asyncio.run(main())

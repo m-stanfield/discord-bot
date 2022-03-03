@@ -25,10 +25,22 @@ class DataBase:
 
 
     async def execute(self, command, args=None):
-        logger.debug(f"SQL Command: {command}")
+        logger.info(f"SQL Command: {command}")
+        print(command)
         async with self.db.begin() as conn:
-            await conn.execute(text(command))
+            result = await conn.execute(text(command))
 
+         #   if result.rowcount < 1:
+            return result
+           # else:
+           #     return result.all()
+ 
+    async def select(self, cmdstr):
+        result = await self.execute(cmdstr)
+        result = result.all()[0]
+        if len(result) == 1:
+            result = result[0]
+        return result
 
     async def createTable(self, tableName, columns, column_types=None, column_defaults=None):
         # schema_list is tuple/list of tuples/lists of keyword/datatype pairs
@@ -77,7 +89,7 @@ class DataBase:
         cmdstr += ") VALUES ("
 
         for idx, elem in enumerate(values):
-            if not(idx == 0):
+            if idx > 0:
                 cmdstr += ", "
             if type(elem) is str:
                 cmdstr += f'"{elem}"'
@@ -113,5 +125,8 @@ if __name__ == "__main__":
     async def main():
         db = DataBase()
         await db.init()
+        await db.insert('users',['id'],[1])
+        result = await db.select('users',['id'])
         await db.close()
+        print(result)
     asyncio.run(main())
