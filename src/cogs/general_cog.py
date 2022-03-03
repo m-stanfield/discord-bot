@@ -16,7 +16,7 @@ class general(commands.Cog):
         self.bot = bot
 
     @slash_command()
-    async def inspire(self, ctx):
+    async def inspire(self, ctx,param:int=None):
         await ctx.respond(inspirobot.generate().url)
 
     @slash_command()
