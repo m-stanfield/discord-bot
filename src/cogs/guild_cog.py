@@ -2,7 +2,7 @@ from discord.ext import commands
 import os
 import sys
 
-import functions.profile_fun as pf
+import src.functions.profile_fun as pf
 import logging
 
 logger = logging.getLogger(__name__)

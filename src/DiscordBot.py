@@ -15,7 +15,7 @@ from src.cogs.user_cog import users
 from src.cogs.guild_cog import guilds
 from src.cogs.general_cog import general
 
-import functions.profile_fun as pf
+import src.functions.profile_fun as pf
 logger = Logger(__name__)
 
 Settings.init()

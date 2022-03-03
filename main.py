@@ -1,10 +1,10 @@
-from DiscordBot import DiscordBot
+from src.DiscordBot import DiscordBot
 import asyncio
 import logging
 from src.logging.logger import Logger
 import argparse
 import os
-from misc.Settings import Settings
+from src.misc.Settings import Settings
 # globals
 logger = Logger(__name__)
 Settings.init()
