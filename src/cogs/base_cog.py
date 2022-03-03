@@ -3,7 +3,7 @@ import discord
 import sys
 import os
 #logger.info(os.getcwd())
-
+from discord.commands import slash_command
 import src.functions.profile_fun as pf
 from datetime import datetime
 #from profile_fun import *
@@ -28,6 +28,22 @@ class base(commands.Cog):
         superuser = await users.pull_value(ctx.author.guild,ctx.author,'superuser')
         if superuser:
             await self.bot.logout()
+
+    @slash_command(guild_ids=[314669831490371585])
+    async def hello(self, ctx):
+        await ctx.respond("Hello!")
+
+
+    @slash_command(guild_ids=[314669831490371585])
+    async def joined(self,
+        ctx, member: discord.Member = None
+    ):  # Passing a default value makes the argument optional
+        print(member)
+        user = member or ctx.author
+        print(user)
+        await ctx.respond(
+            f"{user.name} joined at {discord.utils.format_dt(user.joined_at)}"
+        )
 
 
     @commands.command()
