@@ -90,6 +90,8 @@ class audio(commands.Cog):
         except ValueError:
             a = 1
 
+    def clean_string(self, string):
+        return string.replace("/","_")
     @commands.command()
     async def upload_audio(self,ctx,playerID=None):
         '''Upload custom audio track for intro. If .mp3 file is attached it will be associated with your account'''
@@ -100,7 +102,7 @@ class audio(commands.Cog):
 
             logger.info(ctx.message.attachments[0].filename)#,ctx.message['filename'].attachments)
             if ctx.message.attachments[0].filename[-4:] == '.mp3':
-                customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+                customfile  = 'custom_' + self.clean_string(member.name) +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
 
                 await ctx.message.attachments[0].save('data/audio/users/'+customfile)
 
@@ -140,8 +142,8 @@ class audio(commands.Cog):
     def find_member_audio(self,member,default_audio,directory='data/audio/users/'):
         audiofile = ''
 
-        customfile  = 'custom_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
-        defaultfile = 'default_' + member.name +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+        customfile  = 'custom_' + self.clean_string(member.name) +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
+        defaultfile = 'default_' + self.clean_string(member.name) +'_'+ str(member.id)+ '_'+ str(member.guild.id) +'.mp3'
 
         text = member.display_name
         if not(default_audio):
