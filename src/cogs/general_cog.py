@@ -20,9 +20,9 @@ class general(commands.Cog):
         await ctx.respond(inspirobot.generate().url)
 
     @slash_command()
-    async def roll(self,ctx,*args):
+    async def roll(self,ctx,roll_string=""):
         '''Rolls dice. !roll <dice string>. Dice string exmaple: 1d20 -4d2 + 8 -2d2'''
-        await ctx.respond(pf.roll_dice(args))
+        await ctx.respond(pf.roll_dice(roll_string))
 
 
     @slash_command()
