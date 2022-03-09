@@ -1,3 +1,4 @@
+from email import message
 from discord.ext import commands
 import numpy as np
 import os
@@ -5,6 +6,7 @@ import sys
 
 import discord
 import src.functions.profile_fun as pf
+from discord.commands import slash_command
 
 import logging
 
@@ -73,37 +75,40 @@ class users(commands.Cog):
         await member.edit(nick=str(oldNickname))
         await ctx.respond('Nickname reset to %s for %s'%(oldNickname,member.name))
 
-    @commands.command()
-    async def volume(self, ctx,volume: float,playerID=None):
-        '''Sets volume of users to included value. !volume <value> @<mention>. @<mention> only works for superusers'''
+    @slash_command()
+    async def volume(self, ctx,volume: float,member: discord.Member=None):
+        '''Sets volume of users to included value. !volume <value>. '''
         '''
         volume (float)
             The playback volume that the bot uses in voice chats. Defaults to 0.5.
         playerID
             If a super users @mentions a user the user who was @mentioned has their volume changes
         '''
-        member = await self.find_supermember(ctx,playerID)
+        member = await self.find_supermember(ctx,member)
         oldVolume = await self.pull_value(ctx.author.guild,member,'volume')
         await self.set_value(ctx.author.guild,member,'volume',volume)
         await ctx.respond('Volume set from %0.3f to %0.3f for %s'%(oldVolume,volume,member.name))
 
-    @commands.command()
-    async def custom_audio(self, ctx,custom_audio: float,playerID=None):
-        '''Sets rate of playing custom audio intro of users to included value. !custom_audio <value> @<mention>. @<mention> only works for superusers'''
+    @slash_command()
+    async def custom_audio(self, ctx,custom_audio_percentage: float,member: discord.Member=None):
+        '''Sets rate of playing custom audio intro of users to included value.'''
+        ''' !custom_audio <value> @<mention>. @<mention> only works for superusers'''
         '''
-        custom_audio (float)
+        custom_audio_percentage (float)
             The rate of which custom audio is player compared to default.
         playerID
             If a super users @mentions a user the user who was @mentioned has their custom_audio ratio changes
         '''
-        member = await self.find_supermember(ctx,playerID)
+        member = await self.find_supermember(ctx,member)
         oldcustom_audio = await self.pull_value(ctx.author.guild,member,'custom_audio')
-        await self.set_value(ctx.author.guild,member,'custom_audio',custom_audio)
-        await ctx.respond('custom_audio set from %0.2f to %0.2f for %s'%(oldcustom_audio,custom_audio,member.name))
+        await self.set_value(ctx.author.guild,member,'custom_audio',custom_audio_percentage)
+        await ctx.respond('custom_audio set from %0.2f to %0.2f for %s'%(oldcustom_audio,custom_audio_percentage,member.name))
 
-    @commands.command()
-    async def length(self, ctx,length: float,playerID=None):
-        '''Sets length of custom audio intro of users to included value. !length <value> @<mention>. @<mention> only works for superusers'''
+    @slash_command()
+    async def length(self, ctx,length: float,member: discord.Member=None):
+        '''Sets length of custom audio intro of users to included value.'''
+
+        ''' !length <value> @<mention>. @<mention> only works for superusers'''
         '''
         length (float)
             The duration of audio clip played. If greater than 3 second and not
@@ -112,29 +117,34 @@ class users(commands.Cog):
             If a super users @mentions a user the user who was @mentioned has
             their length changes
         '''
-        member = await self.find_supermember(ctx,playerID)
+        member = await self.find_supermember(ctx,member)
         oldLength = await self.pull_value(ctx.author.guild,member,'length')
         superuser = await self.check_super(ctx.author.guild,member)
         #logger.info(length)
+        messagestring = ""
+        max_play_time = 3.0
         if not(superuser):
-            length = np.min((length,3.0))
+            messagestring += f"Longest Playtime allowed is {max_play_time}. Reducing length from {length} to {max_play_time}.\n"
+            length = np.min((length,max_play_time))
         await self.set_value(ctx.author.guild,member,'length',length)
         await ctx.respond('Length set from %0.3f to %0.3f for %s'%(oldLength,length,member.name))
 
-    @commands.command()
-    async def solo_play(self,ctx,playerID=None):
-        '''Sets if intro plays if only user on voice channel. !solo_play <value> @<mention>. @<mention> only works for superusers'''
+    @slash_command()
+    async def solo_play(self,ctx,value:int, member: discord.Member=None):
+        '''Toggles if intro plays if only user on voice channel. '''
+        
+        '''!solo_play <1/0> @<mention>. @<mention> only works for superusers'''
         '''
         playerID
             If a super users @mentions a user the user who was @mentioned has
             the bot stops playing if they are only ones on channel changes
         '''
-        member = await self.find_supermember(ctx,playerID)
+        member = await self.find_supermember(ctx,member)
         val = await self.pull_value(ctx.author.guild,member,'solo_play')
-        await self.set_value(ctx.author.guild,member,'solo_play',val==0)
+        await self.set_value(ctx.author.guild,member,'solo_play',value==0)
 
     @commands.command()
-    async def unify_settings(self,ctx,playerID=None):
+    async def unify_settings(self,ctx,member: discord.Member=None):
         '''Sets all other server settings to current servers settings. !unify_settings @<mention>. @<mention> only works for superusers'''
         '''
         playerID
@@ -142,7 +152,7 @@ class users(commands.Cog):
             the bot sets all other servers to have the same settings and custom audio
             as there server where the command was issued.
         '''
-        member = await self.find_supermember(ctx,playerID)
+        member = await self.find_supermember(ctx,member)
 
         mainRow = await self.bot.db.select("SELECT * FROM users WHERE guild_id = %d AND user_id = %d"%(ctx.author.guild.id,member.id))
 
@@ -155,15 +165,15 @@ class users(commands.Cog):
                     await self.set_value(guild,member,key,mainRow[key])
 
 
-    @commands.command()
-    async def settings(self,ctx,playerID=None):
+    @slash_command()
+    async def settings(self,ctx,member: discord.Member=None):
         '''Sends settings for current server. !settings @<mention>. @<mention> only works for superusers'''
         '''
         playerID
             If a super users @mentions a user the user who was @mentioned has
             the bot displays settings for that user on that server.
         '''
-        member = await self.find_supermember(ctx,playerID)
+        member = await self.find_supermember(ctx,member)
         settings = await self.pull_user(ctx.author.guild,member)
         string = '```\nSettings for %s on %s\n'%(member.name,ctx.author.guild)
         maxKey = 0
@@ -178,7 +188,7 @@ class users(commands.Cog):
             string += ' '*(maxKey-curKey) + key + ':  ' + str(settings[key]) + '\n'
         string += '```'
 
-        await ctx.reply(string)
+        await ctx.respond(string)
         #await self.set_value(ctx.author.guild,member,'solo_play',val==0)
 
     async def check_super(self,guild,member):

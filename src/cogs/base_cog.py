@@ -31,7 +31,7 @@ class base(commands.Cog):
 
     @slash_command()
     async def hello(self, ctx):
-        await ctx.respond("Hello!")
+        await ctx.respond(f"Hello {ctx.author.name}!")
 
 
     @slash_command()
@@ -46,13 +46,16 @@ class base(commands.Cog):
         )
 
 
-    @commands.command()
+    @slash_command()
     async def restart(self,ctx):
         '''Shuts bot down. Only usable by bot owner'''
         users = self.bot.get_cog('users')
         superuser = await users.pull_value(ctx.author.guild,ctx.author,'superuser')
         if superuser:
+            ctx.respond("Sorry, I forgot how to restart myself")
             await self.bot.logout()
+        else:
+            ctx.respond(f"You can't tell me what to do {ctx.author.name}!")
 
 
     @commands.Cog.listener()

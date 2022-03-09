@@ -5,6 +5,7 @@ import sys
 
 import src.functions.profile_fun as pf
 import logging
+from discord.commands import slash_command
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +14,7 @@ class images(commands.Cog):
         logger.info('Cog Loaded: images')
         self.bot = bot
 
-    @commands.command()
+    @slash_command()
     async def upload_image(self,ctx):
         users = self.bot.get_cog('users')
         superuser = await users.check_super(ctx.guild, ctx.author)
