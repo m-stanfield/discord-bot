@@ -1,6 +1,7 @@
 import discord
 import asyncio
-from src.database.DataBase import DataBase
+from src.database.BaseDataBase import BaseDataBase
+from src.database.DiscordDataBase import DiscordDataBase
 from src.common.Settings import Settings
 
 from src.logging.logger import Logger
@@ -23,11 +24,11 @@ class DiscordBot(discord.Bot):
             intents=kwargs.pop("intents")
         )
 
-        db:DataBase = None if "db" not in kwargs else kwargs.pop('db')
+        db:BaseDataBase = None if "db" not in kwargs else kwargs.pop('db')
         print(db)
-        if not(isinstance(db,DataBase)):
+        if not(isinstance(db,BaseDataBase)):
             path = Settings.get("SQLITE_DB") if "SQLITE_DB" not in kwargs else kwargs.pop("SQLITE_DB")
-            db = DataBase(path=path)
+            db = DiscordDataBase(path=path)
         self.db = db
 
 
