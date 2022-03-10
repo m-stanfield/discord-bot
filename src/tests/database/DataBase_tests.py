@@ -9,12 +9,20 @@ class DataBase_tests(unittest.IsolatedAsyncioTestCase):
                      'table_two':{"test_INTEGER":('INTEGER',10),"test_TEXT":("TEXT",'dcba'),"test_REAL":("REAL",1.183),"test_BLOB":("BLOB","TEXTBLOB")}}
     async def test_Init(self):
         db = DataBase(path=self.TEST_DATABASE)
-        await db.init(settings=self.TEST_SCHEMA)
         await db._deleteAllTables()
+        await db.init(settings=self.TEST_SCHEMA)
 
         for table in self.TEST_SCHEMA.keys():
             result = await db.getColumnNames(table)
             assert set(result) == set(self.TEST_SCHEMA[table])
+
+    async def test_getColumnNames(self):
+        db = DataBase(path=self.TEST_DATABASE)
+        await db._deleteAllTables()
+        await db.init(settings=self.TEST_SCHEMA)  
+        for key in self.TEST_SCHEMA:
+            columns = await db.getColumnNames(key)
+            assert set(columns) == set(self.TEST_SCHEMA[key])
                 
     async def test_InvalidColumnInsert(self):
         db = DataBase(path=self.TEST_DATABASE)
@@ -32,11 +40,8 @@ class DataBase_tests(unittest.IsolatedAsyncioTestCase):
 
         insert1 = {'test_INTEGER':10831, 'test_TEXT':"test_text"}
         selection = await db.select(tableName='table_one',values_where=insert1)
-        print('selection before: ',selection)
         result =  await db.insert('table_one',insert1)
-
         selection = await db.select(tableName='table_one',values_where=insert1)
-        print('selection after: ',selection)
 
         assert result != False
 
