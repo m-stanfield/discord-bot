@@ -132,7 +132,6 @@ class DataBase:
             cmdstr += ")"
 
             result = await self.execute(cmdstr)
-            print(result.all())
         table_columns = await self.getColumnNames(tableName=tableName)
         self._schema[tableName] = list(table_columns)
         return True
@@ -177,10 +176,7 @@ class DataBase:
 
     async def getColumnNames(self,tableName):
         result = await self.execute(f"SELECT * FROM {tableName}")
-        print('columns',result.keys())
-       # col = await self.select(tableName="all_tables",columns=['table_name'])
-       # print(col)
-        return result.keys()
+        return list(result.keys())
 
 
 if __name__ == "__main__":

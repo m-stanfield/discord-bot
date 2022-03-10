@@ -9,7 +9,7 @@ from src.logging.logger import Logger
 logger = Logger(__name__)
 
 Settings.init()
-class DiscordBot(discord.ext.commands.Bot):
+class DiscordBot(discord.Bot):
 
     DEFAULT_KWARGS = {'description':"default description","command_prefix":"!","intents":None}
     def __init__(self, **kwargs):
@@ -26,18 +26,22 @@ class DiscordBot(discord.ext.commands.Bot):
         db:DataBase = None if "db" not in kwargs else kwargs.pop('db')
         print(db)
         if not(isinstance(db,DataBase)):
-            db = DataBase(path=Settings.get('SQLITE_DB'))
+            path = Settings.get("SQLITE_DB") if "SQLITE_DB" not in kwargs else kwargs.pop("SQLITE_DB")
+            db = DataBase(path=path)
         self.db = db
 
 
     
     async def run(self):
+        await self.db.init()
+
         try:
             await self.start(Settings.get("DISCORD_TOKEN"))
         except KeyboardInterrupt:
+            print('here')
             logger.info("KeyboardInterrupt: Exiting Program")
             await self.db.close()
-            await self.logout()
+            await self.close()
             
 
 
@@ -48,6 +52,6 @@ if __name__ == "__main__":
         bot = DiscordBot(SQLITE_DB=Settings.get('SQLITE_DB'))
 
         await bot.run()
-
-    asyncio.run(main())
+    while True:
+        asyncio.run(main())
     
