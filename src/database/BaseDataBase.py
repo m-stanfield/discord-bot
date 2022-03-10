@@ -8,7 +8,11 @@ from typing import Any
 logger = Logger(__name__)
 Settings.init()
 
-class DataBase:
+# TODO:
+#   1) Add ability to edit cells on conditions, UPDATE sql command
+#       
+
+class BaseDataBase:
     #DEFAULT_KWARGS = {'path':':memory:'}#
     DEFAULT_KWARGS = {'path': 'data/database/discord_bot.db'}
     db:Engine|None = None
@@ -42,7 +46,10 @@ class DataBase:
 
     async def _deleteAllTables(self):
         keys = await self.getTableNames()
-        await self._deleteTables(keys)
+        if len(keys) > 0:
+            print('keys: ',keys)
+
+            await self._deleteTables(keys)
         self._schema = {}
 
 
@@ -111,29 +118,34 @@ class DataBase:
             raise ValueError(errormsg)
 
         current_table = await self.getTableNames()
-        if tableName not in current_table:
+        table_did_not_exists = tableName not in current_table
+        print('table_did_not_exists',table_did_not_exists)
+        # generate command string for creating a table
+        cmdstr = f"CREATE TABLE if not exists {tableName} ("
+        for i in range(len(columns)):
+            # for first element, skip the column
+            if i > 0:
+                cmdstr += ", "
 
-            # generate command string for creating a table
-            cmdstr = f"CREATE TABLE if not exists {tableName} ("
-            for i in range(len(columns)):
-                # for first element, skip the column
-                if i > 0:
-                    cmdstr += ", "
+            # write ? to position the column name
+            cmdstr += f"{columns[i]}"
 
-                # write ? to position the column name
-                cmdstr += f"{columns[i]}"
+            # if column datatype is given, add ? for its position
+            if column_types is not None:
+                cmdstr += f" {column_types[i]}"
 
-                # if column datatype is given, add ? for its position
-                if column_types is not None:
-                    cmdstr += f" {column_types[i]}"
+            if column_defaults is not None:
+                cmdstr += f" DEFAULT {column_defaults[i]}"
+        cmdstr += ")"
 
-                if column_defaults is not None:
-                    cmdstr += f" DEFAULT {column_defaults[i]}"
-            cmdstr += ")"
+        result = await self.execute(cmdstr)
 
-            result = await self.execute(cmdstr)
         table_columns = await self.getColumnNames(tableName=tableName)
         self._schema[tableName] = list(table_columns)
+
+        if table_did_not_exists:
+            values = dict(zip(columns,column_defaults))
+            await self.insert(table=tableName,values=values)
         return True
 
     def _buildInsertString(self, table:str, values:dict[str]) -> str:
@@ -178,13 +190,18 @@ class DataBase:
         result = await self.execute(f"SELECT * FROM {tableName}")
         return list(result.keys())
 
+    async def checkIfEntryExists(self, tableName:str, values:dict[Any]):
+        result = await self.select(tableName=tableName, values_where=values)
+        return len(result) > 0
+        
+
 
 if __name__ == "__main__":
     Settings()
     async def main():
         TEST_SCHEMA = {'table_one':{"test_INTEGER":('INTEGER',1),"test_TEXT":("TEXT",'abcd'),"test_REAL":("REAL",3.14159),"test_BLOB":("BLOB",1.28187138)}, 
                             'table_two':{"test_INTEGER":('INTEGER',10),"test_TEXT":("TEXT",'dcba'),"test_REAL":("REAL",1.183),"test_BLOB":("BLOB","TEXTBLOB")}}
-        db = DataBase(path='src/tests/database/test.db')
+        db = BaseDataBase(path='src/tests/database/test.db')
         await db.init(settings=TEST_SCHEMA)
         for i in range(10):
             await db.insert('table_one',{"test_INTEGER":100})
