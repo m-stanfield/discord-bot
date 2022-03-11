@@ -24,6 +24,7 @@ class BaseDataBase:
             self.db = create_async_engine("sqlite+aiosqlite:///"+self._kwargs['path'])
             logger.info(f"Data has been loaded from : {self._kwargs['path']}")
 
+
     async def close(self):
         logger.info(f"Attempting to close database")
         await self.db.dispose()
@@ -32,7 +33,7 @@ class BaseDataBase:
     async def delete(self, tableName:str):
         if tableName in self._schema:
             self._schema.pop(tableName)
-            cmdstr = f"DELETE FROM {tableName}"
+            cmdstr = f"DROP TABLE {tableName}"
             await self.execute(cmdstr)
             result = True
         else:
@@ -46,6 +47,7 @@ class BaseDataBase:
 
     async def _deleteAllTables(self):
         keys = await self.getTableNames()
+        print('keys: ',keys)
         if len(keys) > 0:
             print('keys: ',keys)
 
@@ -171,10 +173,11 @@ class BaseDataBase:
         if not(set(values.keys()).issubset(set(self._schema[table]))):
             return False
         cmdstr = self._buildInsertString(table=table, values=values)
-        return await self.execute(cmdstr)
+        result = await self.execute(cmdstr)
+        return result
 
 
-    async def init(self, settings:dict[str,tuple[str,Any]]|None = None):
+    async def init(self, settings:dict[str,tuple[str,Any]]|None = None, **kwargs):
         db_settings = settings if settings is not None else Settings.get('DATA_BASE')
         for key in db_settings:
             columns = []
@@ -193,6 +196,43 @@ class BaseDataBase:
     async def checkIfEntryExists(self, tableName:str, values:dict[Any]):
         result = await self.select(tableName=tableName, values_where=values)
         return len(result) > 0
+
+    async def update(self, tableName:str, values_where:dict[Any], updated_values:dict[Any]):
+        cmdstr = self._updateEntryString(tableName=tableName, values_where=values_where, updated_values=updated_values)
+        print(cmdstr)
+        result = await self.execute(cmdstr)
+        return result
+
+
+    def _updateEntryString(self, tableName:str, values_where:dict[Any], updated_values:list[str]):
+        cmdstr = f"UPDATE {tableName} SET"
+        first_entry = True
+        for column, value in updated_values.items():
+            if not(first_entry):
+                cmdstr += ","
+            else:
+                first_entry = False
+            if type(value) is str:
+                cmdstr += f" {column} = '{value}'"
+
+            else:
+                cmdstr += f" {column} = {value}"
+        cmdstr += " WHERE"
+        first_entry = True
+
+        for column, value in values_where.items():
+            if not(first_entry):
+                cmdstr += " AND "
+            else:
+                first_entry = False
+
+            if type(value) is str:
+                cmdstr += f" {column} = '{value}'"
+
+            else:
+                cmdstr += f" {column} = {value}"
+
+        return cmdstr
         
 
 
@@ -201,11 +241,21 @@ if __name__ == "__main__":
     async def main():
         TEST_SCHEMA = {'table_one':{"test_INTEGER":('INTEGER',1),"test_TEXT":("TEXT",'abcd'),"test_REAL":("REAL",3.14159),"test_BLOB":("BLOB",1.28187138)}, 
                             'table_two':{"test_INTEGER":('INTEGER',10),"test_TEXT":("TEXT",'dcba'),"test_REAL":("REAL",1.183),"test_BLOB":("BLOB","TEXTBLOB")}}
-        db = BaseDataBase(path='src/tests/database/test.db')
+        db = BaseDataBase(path='src/tests/database/test.db',settings=TEST_SCHEMA)
+        await db.init(settings=TEST_SCHEMA)
+
+        await db._deleteAllTables()
+
         await db.init(settings=TEST_SCHEMA)
         for i in range(10):
             await db.insert('table_one',{"test_INTEGER":100})
-        await db._deleteAllTables()
+
+        await db.insert('table_one',{"test_INTEGER":1346789326247819})
+        await db.insert('table_one',{"test_INTEGER":100, 'test_TEXT':'test insert'})
+
+        await db.update('table_one',values_where={'test_INTEGER':1346789326247819},updated_values={'test_INTEGER':-3})
+        await db.update('table_one',values_where={'test_INTEGER':100,'test_TEXT':"test insert"},updated_values={'test_REAL':-1.17371})
+
         #await db.init(settings=TEST_SCHEMA)
 
 
