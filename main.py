@@ -42,7 +42,7 @@ async def main():
         logger.info("Launching Bot")
         bot = DiscordBot.DiscordBot(SQLITE_DB=Settings.Settings.get('SQLITE_DB'))
         await bot.run()
-        run_status = bot.getRunStatus()
+        run_status = await bot.getRunStatus()
         time.sleep(3)
         if run_status:
             logger.info("Bot is restarting")

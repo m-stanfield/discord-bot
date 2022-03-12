@@ -1,6 +1,6 @@
 import discord
 from discord.ext.commands import Bot
-
+import asyncio
 import src.logging.logger as Logger
 from src.database.BaseDataBase import BaseDataBase
 from src.database.DiscordDataBase import DiscordDataBase
@@ -55,7 +55,22 @@ class DiscordBot(Bot):
     async def setRunStatus(self, status: bool):
         self.run_status = status
 
-    def getRunStatus(self):
+    async def getRunStatus(self):
         return self.run_status
+
+    async def playAudio(self, channel:discord.VoiceChannel, file_name:str, volume:float=0.1, length:float=3):
+        logger.debug(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+
+        if self.voice_clients == []:
+            logger.info(f"Playing")
+            voice = await channel.connect(timeout=1.0)
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file_name),volume=volume)
+            voice.play(source,after=lambda e: logger.info('player error: %s' %e) if e else None)
+            await asyncio.sleep(length)
+            await voice.disconnect()   
+            logger.info(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+        else:
+            logger.debug(f"Could not play audio due to a different connection already existing.")
+
 
 
