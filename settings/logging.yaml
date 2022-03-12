@@ -57,27 +57,32 @@ loggers:
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
 
-    DiscordBot:
+    src.DiscordBot:
         level: DEBUG
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
       
-    misc.Settings:
+    src.common.Settings:
         level: DEBUG
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
 
-    misc.Settings:
+    src.common.Settings:
         level: DEBUG
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
 
-    logging.Logger:
+    src.logging.logger:
         level: DEBUG
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
         
-    database.DataBase:
+    src.database.DataBase:
+        level: DEBUG
+        handlers: [console, info_file_handler, error_file_handler]
+        propagate: no
+
+    src.database.DiscordDataBase:
         level: DEBUG
         handlers: [console, info_file_handler, error_file_handler]
         propagate: no
