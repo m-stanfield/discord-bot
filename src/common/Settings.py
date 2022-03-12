@@ -70,7 +70,7 @@ class Settings:
     def _load_env(cls):
         dotenv.load_dotenv()
 
-        env = ["DISCORD_TOKEN", "SQLITE_DB"]
+        env = ["DISCORD_TOKEN", "SQLITE_DB", "BOT_NAME"]
 
         for key in env:
             try:
