@@ -1,14 +1,21 @@
 import discord
 from discord.ext.commands import Bot
 import asyncio
-import src.logging.logger as Logger
+
+
+from src.logging.logger import Logger
 from src.database.BaseDataBase import BaseDataBase
 from src.database.DiscordDataBase import DiscordDataBase
 from src.common.Settings import Settings
-import src.cogs.OwnerCommands as OwnerCommands
+
+# cogs
+from src.cogs.BaseCog import BaseCog
+from src.cogs.ListenerCog import ListenerCog
+from src.cogs.OwnerCog import OwnerCog
+from src.cogs.ReactRoleCog import ReactRoleCog
 
 
-logger = Logger.Logger(__name__)
+logger = Logger(__name__)
 
 
 class DiscordBot(Bot):
@@ -33,7 +40,12 @@ class DiscordBot(Bot):
                 "SQLITE_DB") if "SQLITE_DB" not in kwargs else kwargs.pop("SQLITE_DB")
             db = DiscordDataBase(path=path)
         self.db = db
-        self.add_cog(OwnerCommands.OwnerCommands(self))
+
+        #adding all cogs to the bot
+        self.add_cog(BaseCog(self))
+        self.add_cog(ListenerCog(self))
+        self.add_cog(OwnerCog(self))
+        self.add_cog(ReactRoleCog(self))
 
         self.run_status = True
 
