@@ -1,3 +1,4 @@
+from dis import disco
 import discord
 from discord.ext.commands import Bot
 import asyncio
@@ -14,7 +15,7 @@ from src.cogs.ListenerCog import ListenerCog
 from src.cogs.OwnerCog import OwnerCog
 from src.cogs.ReactRoleCog import ReactRoleCog
 
-
+import time
 logger = Logger(__name__)
 
 
@@ -70,6 +71,9 @@ class DiscordBot(Bot):
     async def getRunStatus(self):
         return self.run_status
 
+    async def getConnectionStatus(self):
+        return self.connection_status
+
     async def playAudio(self, channel:discord.VoiceChannel, file_name:str, volume:float=0.1, length:float=3):
         logger.debug(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
 
@@ -86,3 +90,16 @@ class DiscordBot(Bot):
 
 
 
+    async def disconnect_timeout(self, timeout:float=10.0,interval:float=0.5):
+        start_time = time.time()/1000
+        disconnected = False
+        while (time.time()/1000 - start_time <= timeout):
+            if self.is_closed():
+                logger.info("Bot has disconnected from discord")
+                disconnected = True
+                break
+            else:
+                time.sleep(interval)
+        if not(disconnected):
+            logger.info(f"Bot did not disconnet from discord after {timeout} seconds and timed out")
+        return disconnected
