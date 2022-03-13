@@ -5,7 +5,8 @@ import os
 import logging.config
 import yaml
 
-
+# TODO:
+#   1) Implement multiple log files that get cycled
 
 class Logger:
     logger_initalized = False
