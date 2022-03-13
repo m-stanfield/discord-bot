@@ -2,11 +2,12 @@ import unittest
 import asyncio
 
 from src.database.BaseDataBase import BaseDataBase
+from src.database.Schema import schema_dict
 
 class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
     TEST_DATABASE = 'src/tests/database/test.db'
-    TEST_SCHEMA = {'table_one':{"test_INTEGER":('INTEGER',1),"test_TEXT":("TEXT",'abcd'),"test_REAL":("REAL",3.14159),"test_BLOB":("BLOB",1.28187138)}, 
-                     'table_two':{"test_INTEGER":('INTEGER',10),"test_TEXT":("TEXT",'dcba'),"test_REAL":("REAL",1.183),"test_BLOB":("BLOB","TEXTBLOB")}}
+    TEST_SCHEMA = {'table_one':{"test_INTEGER":(1,'INTEGER'),"test_TEXT":('abcd',"TEXT"),"test_REAL":(3.14159,"REAL"),"test_BLOB":(1.28187138,"BLOB")}, 
+                        'table_two':{"test_INTEGER":(10, 'INTEGER'),"test_TEXT":('dcba', "TEXT"),"test_REAL":(1.183, "REAL"),"test_BLOB":("TEXTBLOB", "BLOB")}}
     async def test_Init(self):
         db = BaseDataBase(path=self.TEST_DATABASE)
         await db._deleteAllTables()
@@ -104,6 +105,17 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
             result = await db.checkIfEntryExists(tableName = table, values = {key:val})
             assert result == True
         await db._deleteAllTables()
+
+    async def test_SchemaInit(self):
+        db = BaseDataBase(path=self.TEST_DATABASE)
+        await db._deleteAllTables()
+        await db.init() 
+        tables = await db.getTableNames()
+        assert set(tables) == set(schema_dict.keys())
+        for table in set(tables):
+            columns = await db.getColumnNames(tableName=table)
+            assert set(columns) == set(schema_dict[table])
+
 
 
 
