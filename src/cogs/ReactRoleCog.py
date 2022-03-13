@@ -23,3 +23,32 @@ if TYPE_CHECKING:
 class ReactRoleCog(commands.Cog):
     def __init__(self, bot):
         self.bot:DiscordBot = bot
+
+
+
+ # rough idea for how reaction roles might work
+
+    @slash_command
+    def add_role(self, role, emoji, role_group, link=None, description=None):
+        pass
+
+    @slash_command
+    def remove_role(self, role):
+        pass
+
+    @slash_command
+    def remove_role_from_group(self, role, role_group):
+        pass
+
+    @slash_command
+    def define_group(self, role_group, mutual_exclusive=False, *args, **kwargs):
+        pass
+
+    @slash_command
+    def post_role_message(self, auto_sticky=True):
+        pass
+
+    @slash_command
+    def reset_role_settings(self):
+        pass
+
