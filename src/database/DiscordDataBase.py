@@ -6,7 +6,7 @@ import discord
 from discord.guild import Guild
 from discord import Member
 from src.common import Utilities as utils
-
+from typing import Any
 
 USER_TABLE = 'user'
 
@@ -18,9 +18,7 @@ class DiscordDataBase(BaseDataBase):
                             "user_id":member_dict["user_id"], 
                             "user_name":member_dict["user_name"]}
 
-        print(user_settings)
         user_exists = await self.checkIfEntryExists(USER_TABLE,user_settings)
-        print(user_exists)
         if not(user_exists):
             await self.insert(table=USER_TABLE,values=user_settings|{"nickname":member_dict['nick'],"default_nickname":member_dict['name']})
         
@@ -37,7 +35,17 @@ class DiscordDataBase(BaseDataBase):
         values_where = {USER_ID_COLUMN:member_dict['user_id'],GUILD_ID_COLUMN:member_dict['guild_id']}
         updated_values = {'custom_audio':value}
         self.update(tableName=USER_TABLE,values_where=values_where,updated_values=updated_values)
+
+    async def setMemberValues(self, member_dict:dict, updated_values:dict[Any]) -> bool:
+        user_exists = await self.checkIfEntryExists(USER_TABLE,**member_dict)
+        if not(user_exists):
+            await self.createNewMember(member_dict=member_dict)
+        USER_ID_COLUMN = 'user_id'
+        GUILD_ID_COLUMN = 'guild_id'
         
+        values_where = {USER_ID_COLUMN:member_dict['user_id'],GUILD_ID_COLUMN:member_dict['guild_id']}
+        updated_values = {value_name:value}
+        self.update(tableName=USER_TABLE,values_where=values_where,updated_values=updated_values)
         
 
 

@@ -1,5 +1,6 @@
 from src.logging.logger import Logger
 from src.common.Settings import Settings
+from src.database.Schema import schema_dict, UserSchema, GuildSchema
 import asyncio
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -24,6 +25,18 @@ class BaseDataBase:
             self.db = create_async_engine("sqlite+aiosqlite:///"+self._kwargs['path'])
             logger.info(f"Data has been loaded from : {self._kwargs['path']}")
 
+    def __str__(self):
+        output = ""
+        tables = self._schema.keys()
+
+        for table in tables:
+            output += f"Table: {table}\tColumns:"
+            columns = self._schema[table]
+            for col in columns:
+                output += f"{col}, "
+            output = output[:-2] + "\n\n"
+        return output
+
 
     async def close(self):
         logger.info(f"Attempting to close database")
@@ -47,10 +60,7 @@ class BaseDataBase:
 
     async def _deleteAllTables(self):
         keys = await self.getTableNames()
-        print('keys: ',keys)
         if len(keys) > 0:
-            print('keys: ',keys)
-
             await self._deleteTables(keys)
         self._schema = {}
 
@@ -121,7 +131,6 @@ class BaseDataBase:
 
         current_table = await self.getTableNames()
         table_did_not_exists = tableName not in current_table
-        print('table_did_not_exists',table_did_not_exists)
         # generate command string for creating a table
         cmdstr = f"CREATE TABLE if not exists {tableName} ("
         for i in range(len(columns)):
@@ -178,12 +187,13 @@ class BaseDataBase:
 
 
     async def init(self, settings:dict[str,tuple[str,Any]]|None = None, **kwargs):
-        db_settings = settings if settings is not None else Settings.get('DATA_BASE')
-        for key in db_settings:
+        db_settings:dict = schema_dict if settings is None else settings
+        table_schema:dict
+        for key,table_schema in db_settings.items():
             columns = []
             column_types = []
             column_defaults = []
-            for elemName,(elemType, elemDefault) in db_settings[key].items():
+            for elemName,(elemDefault,elemType) in table_schema.items():
                 columns.append(elemName)
                 column_types.append(elemType)
                 column_defaults.append(elemDefault)
@@ -199,7 +209,6 @@ class BaseDataBase:
 
     async def update(self, tableName:str, values_where:dict[Any], updated_values:dict[Any]):
         cmdstr = self._updateEntryString(tableName=tableName, values_where=values_where, updated_values=updated_values)
-        print(cmdstr)
         result = await self.execute(cmdstr)
         return result
 
@@ -239,11 +248,12 @@ class BaseDataBase:
 if __name__ == "__main__":
     Settings()
     async def main():
-        TEST_SCHEMA = {'table_one':{"test_INTEGER":('INTEGER',1),"test_TEXT":("TEXT",'abcd'),"test_REAL":("REAL",3.14159),"test_BLOB":("BLOB",1.28187138)}, 
-                            'table_two':{"test_INTEGER":('INTEGER',10),"test_TEXT":("TEXT",'dcba'),"test_REAL":("REAL",1.183),"test_BLOB":("BLOB","TEXTBLOB")}}
+        TEST_SCHEMA = {'table_one':{"test_INTEGER":(1,'INTEGER'),"test_TEXT":('abcd',"TEXT"),"test_REAL":(3.14159,"REAL"),"test_BLOB":(1.28187138,"BLOB")}, 
+                            'table_two':{"test_INTEGER":(10, 'INTEGER'),"test_TEXT":('dcba', "TEXT"),"test_REAL":(1.183, "REAL"),"test_BLOB":("TEXTBLOB", "BLOB")}}
         db = BaseDataBase(path='src/tests/database/test.db',settings=TEST_SCHEMA)
         await db.init(settings=TEST_SCHEMA)
-
+        print(db)
+        
         await db._deleteAllTables()
 
         await db.init(settings=TEST_SCHEMA)
@@ -260,6 +270,6 @@ if __name__ == "__main__":
 
 
         #await db.insert('table_one',{"test_INTEGER":100})
-
+        
         await db.close()
     asyncio.run(main())
