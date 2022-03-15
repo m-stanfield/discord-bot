@@ -1,7 +1,8 @@
 from dataclasses import asdict, dataclass
 import dataclasses
 from dataclasses import InitVar
-
+from copy import deepcopy
+import time
 @dataclass
 class BaseSchema:
     TABLE_NAME = None
@@ -15,15 +16,31 @@ class BaseSchema:
                 if key in self.__dict__:
                     self.__dict__[key] = table_dict[key]
 
+
+    def copy(self):
+        return deepcopy(self)
+
+    def drop(self, keys:list[str]):
+        for key in keys:
+            if key in self.__dict__.keys():
+                self.__dict__[key] = None
+
     def reset(self):
         for key in self.__dict__:
             self.__dict__[key] = None
 
     def toDict(self):
-        return asdict(self)
+        dictionary = asdict(self)
+        output = {}
+        for key,val in dictionary.items():
+            if val is not None:
+                output[key] = val
+        return output
+
     @classmethod
     def getTableName(self):
-        return type(self).__name__.replace("Schema","").lower()
+        name = self.__name__.replace("Schema","").lower()
+        return name
     
     def __str__(self):
         output = ""
@@ -75,6 +92,17 @@ class UserSchema(BaseSchema):
     audio_enabled:int = 1
     solo_play:int = 0
 
+@dataclass
+class NicknamesSchema(BaseSchema):
+    guild_name:str = 'default_name'
+    guild_id:int = -1
+    user_id:int = -1
+    user_name:str = "default_name"
+    nickname:str = "nickname"
+    timestamp:float = -1.0
+
+    def setTime(self, timestamp:float|None=None):
+        self.timestamp = timestamp if timestamp is not None else time.time()
 
 
 
