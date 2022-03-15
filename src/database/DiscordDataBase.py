@@ -15,18 +15,9 @@ USER_TABLE = 'user'
 logger = Logger(__name__)
 
 class DiscordDataBase(BaseDataBase):
-    async def createNewMember(self, member_dict: dict):
-        user_settings = {"guild_name": member_dict["guild_name"],
-                         "guild_id": member_dict["guild_id"],
-                         "user_id": member_dict["user_id"],
-                         "user_name": member_dict["user_name"]}
-
-        user_exists = await self.checkIfEntryExists(USER_TABLE, user_settings)
-        if not(user_exists):
-            await self.insert(table=USER_TABLE, values=user_settings | {"nickname": member_dict['nick'], "default_nickname": member_dict['name']})
-
-        user_exists = await self.checkIfEntryExists(USER_TABLE, user_settings)
-        return user_exists
+    async def createNewMember(self, new_values: UserSchema):
+        result = await self.setEntryValues(new_values.getTableName(),search_values=new_values)
+        return result
 
     async def setMemberValues(self, member_values: dict | UserSchema, updated_values: dict[Any] | UserSchema) -> bool:
         member_values = member_values if not(isinstance(
@@ -48,13 +39,9 @@ class DiscordDataBase(BaseDataBase):
         columns = ['nickname','timestamp']
         if isinstance(member_values, BaseSchema):
             member_values = member_values.toDict() 
-        print(member_values)
         nickname_user = NicknamesSchema(table_dict = member_values)
         nickname_user.drop(columns)
-        print (columns)
         results = await self.select(tableName=NicknamesSchema.getTableName(), values_where=nickname_user.toDict(), columns=columns)
-        print('result: ',results)
-
         output_string = f".\nNicknames for user: {nickname_user.user_name}```"
         df = pd.DataFrame(results,columns=columns)
         df.sort_values(by=columns[1],inplace=True, ascending=False)
@@ -94,6 +81,6 @@ if __name__ == "__main__":
         await db._deleteAllTables()
         await db.init(settings=Settings.get("DATA_BASE"))
         await db.createNewMember(utils.getFakeMember())
-        await db.setMemberCustomAudio(utils.getFakeMember(), 0.827)
+      #  await db.setMemberCustomAudio(utils.getFakeMember(), 0.827)
         await db.close()
     asyncio.run(main())

@@ -141,6 +141,7 @@ class BaseDataBase:
                 cmdstr += ", "
 
             # write ? to position the column name
+
             cmdstr += f"{columns[i]}"
 
             # if column datatype is given, add ? for its position
@@ -195,7 +196,7 @@ class BaseDataBase:
             columns = []
             column_types = []
             column_defaults = []
-            for elemName,(elemDefault,elemType) in table_schema.items():
+            for elemName,(elemType,elemDefault) in table_schema.items():
                 columns.append(elemName)
                 column_types.append(elemType)
                 column_defaults.append(elemDefault)
@@ -247,7 +248,7 @@ class BaseDataBase:
 
         return cmdstr
         
-    async def setEntryValues(self, tableName:str, search_values:dict|BaseSchema, updated_values:dict[Any]|BaseSchema) -> bool:
+    async def setEntryValues(self, tableName:str, search_values:dict|BaseSchema, updated_values:dict[Any]|BaseSchema|None=None) -> bool:
         # checking if user exists, if not create a new entry in table
         search_values = search_values if not(isinstance(search_values,BaseSchema)) else search_values.toDict()
         updated_values = updated_values if not(isinstance(updated_values,BaseSchema)) else updated_values.toDict()
@@ -255,14 +256,15 @@ class BaseDataBase:
         entry_exists = await self.checkIfEntryExists(tableName, values = search_values)
         if not(entry_exists):
             await self.insert(table=tableName, values=search_values)
-
-        # forcing search keys to not change
-        for key in search_values.keys():
-            updated_values.pop(key,None)
-
         # updating non-search values to updated values
-        await self.update(tableName=tableName,values_where=search_values, updated_values=updated_values)
-        entry_exists = await self.checkIfEntryExists(tableName, values = search_values|updated_values)
+        final_values = search_values
+        if updated_values is not None:
+            for key in search_values.keys():
+                updated_values.pop(key,None)
+            final_values = search_values|updated_values
+            await self.update(tableName=tableName,values_where=search_values, updated_values=updated_values)
+
+        entry_exists = await self.checkIfEntryExists(tableName, values = final_values)
         return entry_exists
 if __name__ == "__main__":
     Settings()

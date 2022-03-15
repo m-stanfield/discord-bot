@@ -8,8 +8,8 @@ from src.database.Schema import UserSchema, schema_dict
 
 class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
     TEST_DATABASE = 'src/tests/database/test.db'
-    TEST_SCHEMA = {'table_one':{"test_INTEGER":(1,'INTEGER'),"test_TEXT":('abcd',"TEXT"),"test_REAL":(3.14159,"REAL"),"test_BLOB":(1.28187138,"BLOB")}, 
-                        'table_two':{"test_INTEGER":(10, 'INTEGER'),"test_TEXT":('dcba', "TEXT"),"test_REAL":(1.183, "REAL"),"test_BLOB":("TEXTBLOB", "BLOB")}}
+    TEST_SCHEMA = {'table_one':{"test_INTEGER":('INTEGER',1),"test_TEXT":("TEXT",'abcd'),"test_REAL":("REAL",3.14159),"test_BLOB":("BLOB",1.28187138)}, 
+                        'table_two':{"test_INTEGER":('INTEGER',10),"test_TEXT":("TEXT", 'dcba'),"test_REAL":("REAL", 1.183),"test_BLOB":("BLOB","TEXTBLOB")}}
     
     def __init__(self, *args, database:BaseDataBase|None=None, **kwargs):
         self.database:BaseDataBase = database if database is not None else BaseDataBase
@@ -124,6 +124,7 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
             assert set(columns) == set(schema_dict[table])
 
     async def test_setEntryValues(self):
+ 
         db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init() 
@@ -138,7 +139,6 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
         await db.setEntryValues(tableName=UserSchema.getTableName(),search_values=user.toDict(), updated_values=updated_user.toDict())
         entryExists = await db.checkIfEntryExists(UserSchema.getTableName(),updated_user.toDict())
         assert entryExists == True
-
 
 
 

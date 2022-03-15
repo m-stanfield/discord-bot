@@ -3,6 +3,7 @@ import dataclasses
 from dataclasses import InitVar
 from copy import deepcopy
 import time
+from typing import Any
 @dataclass
 class BaseSchema:
     TABLE_NAME = None
@@ -24,6 +25,13 @@ class BaseSchema:
         for key in keys:
             if key in self.__dict__.keys():
                 self.__dict__[key] = None
+
+    def pop(self, key:str, default:Any=None):
+        popped_val = default
+        if key in self.__dict__.keys():
+            popped_val = self.__dict__[key]
+            self.drop(key)
+        return popped_val
 
     def reset(self):
         for key in self.__dict__:
@@ -64,7 +72,7 @@ def PyToSQLConverter(value):
         sql_type = "TEXT"
         value = str(value)
 
-    return value, sql_type
+    return sql_type, value
 
 @dataclass
 class GuildSchema(BaseSchema):
@@ -122,7 +130,7 @@ schema_dict =  _generateSchemaDict(var_dict=vars())
 
 
 if __name__  == "__main__":
-    print(schema_dict.keys())
+    print(schema_dict)
     
     
     for tableName,tableSchema in schema_dict.items():
