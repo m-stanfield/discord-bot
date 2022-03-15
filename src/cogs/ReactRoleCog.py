@@ -27,7 +27,7 @@ class ReactRoleCog(commands.Cog):
 
 
  # rough idea for how reaction roles might work
-
+    """
     @slash_command
     def add_role(self, role, emoji, role_group, link=None, description=None):
         pass
@@ -52,3 +52,4 @@ class ReactRoleCog(commands.Cog):
     def reset_role_settings(self):
         pass
 
+    """
