@@ -1,15 +1,22 @@
+from lib2to3.pytree import Base
 import unittest
 import asyncio
+from src.database.DiscordDataBase import DiscordDataBase
 
 from src.database.BaseDataBase import BaseDataBase
-from src.database.Schema import schema_dict
+from src.database.Schema import UserSchema, schema_dict
 
 class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
     TEST_DATABASE = 'src/tests/database/test.db'
     TEST_SCHEMA = {'table_one':{"test_INTEGER":(1,'INTEGER'),"test_TEXT":('abcd',"TEXT"),"test_REAL":(3.14159,"REAL"),"test_BLOB":(1.28187138,"BLOB")}, 
                         'table_two':{"test_INTEGER":(10, 'INTEGER'),"test_TEXT":('dcba', "TEXT"),"test_REAL":(1.183, "REAL"),"test_BLOB":("TEXTBLOB", "BLOB")}}
+    
+    def __init__(self, *args, database:BaseDataBase|None=None, **kwargs):
+        self.database:BaseDataBase = database if database is not None else BaseDataBase
+        super().__init__(*args, **kwargs)
+    
     async def test_Init(self):
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init(settings=self.TEST_SCHEMA)
 
@@ -19,16 +26,16 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
         await db._deleteAllTables()
 
     async def test_getColumnNames(self):
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init(settings=self.TEST_SCHEMA)  
         for key in self.TEST_SCHEMA:
             columns = await db.getColumnNames(key)
             assert set(columns) == set(self.TEST_SCHEMA[key])
         await db._deleteAllTables()
-          
+        
     async def test_InvalidColumnInsert(self):
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init(settings=self.TEST_SCHEMA)
 
@@ -38,7 +45,7 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
         await db._deleteAllTables()
 
     async def test_ValidColumnInsert(self):
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init(settings=self.TEST_SCHEMA)
 
@@ -52,7 +59,7 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
 
     async def test_buildSelectString(self):
         
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init(settings=self.TEST_SCHEMA)
 
@@ -67,7 +74,7 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
 
     async def test_buildInsertString(self):
         
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init(settings=self.TEST_SCHEMA)
 
@@ -78,7 +85,7 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
 
 
     async def test_checkIfEntryExists(self):
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init(settings=self.TEST_SCHEMA)
         table = list(self.TEST_SCHEMA.keys())[0]
@@ -107,7 +114,7 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
         await db._deleteAllTables()
 
     async def test_SchemaInit(self):
-        db = BaseDataBase(path=self.TEST_DATABASE)
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init() 
         tables = await db.getTableNames()
@@ -116,6 +123,33 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
             columns = await db.getColumnNames(tableName=table)
             assert set(columns) == set(schema_dict[table])
 
+    async def test_setEntryValues(self):
+        db:BaseDataBase = self.database(path=self.TEST_DATABASE)
+        await db._deleteAllTables()
+        await db.init() 
+        user = UserSchema(reset=True)
+        user.user_id = 178937428979
+        user.guild_id = 184387172189
+        updated_user = user.copy()
+        updated_user.ban = 1
+        updated_user.default_nickname = "updated uesr default nick name"
+        entryExists = await db.checkIfEntryExists(UserSchema.getTableName(),user.toDict())
+        assert entryExists == False
+        await db.setEntryValues(tableName=UserSchema.getTableName(),search_values=user.toDict(), updated_values=updated_user.toDict())
+        entryExists = await db.checkIfEntryExists(UserSchema.getTableName(),updated_user.toDict())
+        assert entryExists == True
+
+
+
+
+
+
+class DiscordDataBase_tests(BaseDataBase_tests):
+
+    def __init__(self,*args,**kwargs):#
+        super().__init__(*args,database=DiscordDataBase,**kwargs)
+    async def test_Test(self):
+        pass
 
 
 
@@ -127,4 +161,4 @@ if __name__ == "__main__":
         await db.init()
         await db._deleteAllTables()
         await db.close()
-    asyncio.run(main())
+    #asyncio.run(main())
