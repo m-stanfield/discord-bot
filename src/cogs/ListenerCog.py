@@ -84,12 +84,11 @@ class ListenerCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before:discord.Member, after:discord.Member):
-        pass
+        await self.bot.db.updateUserInformation(before=before, after=after)
 
     @commands.Cog.listener()
     async def on_user_update(self, before:discord.User, after:discord.User):
         # TODO: Implement auto-replacement of previous user info to  current discord info
         pass
-
     
 

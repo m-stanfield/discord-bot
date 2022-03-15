@@ -105,14 +105,17 @@ class BaseDataBase:
         cmdstr += f" FROM {tableName}"
         if values_where is not None:
             cmdstr += " WHERE "
+            counter = 0
             for idx, (column, value) in enumerate(values_where.items()):
-                if not(idx == 0):
-                    cmdstr += " AND "
-                cmdstr += f"{column} = "
-                if type(value) is str:
-                    cmdstr += f"'{value}'"
-                else:
-                    cmdstr += f"{value}"
+                if value is not None:
+                    if not(counter == 0):
+                        cmdstr += " AND "
+                    counter += 1
+                    cmdstr += f"{column} = "
+                    if type(value) is str:
+                        cmdstr += f"'{value}'"
+                    else:
+                        cmdstr += f"{value}"
         return cmdstr
 
     async def createTable(self, tableName, columns, column_types=None, column_defaults=None):
@@ -244,8 +247,23 @@ class BaseDataBase:
 
         return cmdstr
         
+    async def setEntryValues(self, tableName:str, search_values:dict|BaseSchema, updated_values:dict[Any]|BaseSchema) -> bool:
+        # checking if user exists, if not create a new entry in table
+        search_values = search_values if not(isinstance(search_values,BaseSchema)) else search_values.toDict()
+        updated_values = updated_values if not(isinstance(updated_values,BaseSchema)) else updated_values.toDict()
 
+        entry_exists = await self.checkIfEntryExists(tableName, values = search_values)
+        if not(entry_exists):
+            await self.insert(table=tableName, values=search_values)
 
+        # forcing search keys to not change
+        for key in search_values.keys():
+            updated_values.pop(key,None)
+
+        # updating non-search values to updated values
+        await self.update(tableName=tableName,values_where=search_values, updated_values=updated_values)
+        entry_exists = await self.checkIfEntryExists(tableName, values = search_values|updated_values)
+        return entry_exists
 if __name__ == "__main__":
     Settings()
     async def main():

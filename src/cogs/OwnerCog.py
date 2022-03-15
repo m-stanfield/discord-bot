@@ -43,7 +43,7 @@ class OwnerCog(commands.Cog):
         print(ctx.author.guild)
         print("Bot Name: ",Settings.get("BOT_NAME"))
         await ctx.send(f"Mention using author: {utils.memberToMentionString(ctx.author)}")
-        await ctx.send(f"Mention using dict: {utils.memberToMentionString(utils.memberToDict(ctx.author))}")
+        await ctx.send(f"Mention using dict: {utils.memberToMentionString(utils.memberToSchema(ctx.author))}")
 
     @commands.command()
     @commands.is_owner()
