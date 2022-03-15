@@ -1,29 +1,38 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 import dataclasses
 from dataclasses import InitVar
 
 @dataclass
 class BaseSchema:
+    TABLE_NAME = None
     reset: InitVar[bool] = None
-    member_dict: InitVar[dict|None] = None
-    def __post_init__(self, reset:bool=True,member_dict:dict|None=None):
+    table_dict: InitVar[dict|None] = None
+    def __post_init__(self, reset:bool=True,table_dict:dict|None=None):
         if reset:
             self.reset()
-        if member_dict is not None and isinstance(member_dict, dict):
-            for key in member_dict.keys():
+        if table_dict is not None and isinstance(table_dict, dict):
+            for key in table_dict.keys():
                 if key in self.__dict__:
-                    self.__dict__[key] = member_dict[key]
+                    self.__dict__[key] = table_dict[key]
 
     def reset(self):
-
         for key in self.__dict__:
             self.__dict__[key] = None
+
+    def toDict(self):
+        return asdict(self)
+    @classmethod
+    def getTableName(self):
+        return type(self).__name__.replace("Schema","").lower()
     
     def __str__(self):
         output = ""
         for key in self.__dict__:
             output += f"{key}: {self.__dict__[key]}\n"
         return output
+
+    def __iter__(self):
+        yield from self.__dict__.items()
 
 def PyToSQLConverter(value): 
     val_type = type(value)
@@ -77,22 +86,31 @@ def _generateSchemaDict(var_dict:dict):
 
         if dataclasses.is_dataclass(var_dict[key]) and key != BaseSchema.__name__:
 
-            value_dict[key.replace("Schema","").lower()] = {field.name:PyToSQLConverter(field.default) for field in dataclasses.fields(var_dict[key])}
+            value_dict[var_dict[key]().getTableName()] = {field.name:PyToSQLConverter(field.default) for field in dataclasses.fields(var_dict[key])}
     
     return value_dict
 
 schema_dict =  _generateSchemaDict(var_dict=vars())
 
+
 if __name__  == "__main__":
     print(schema_dict.keys())
-
+    
     
     for tableName,tableSchema in schema_dict.items():
         print(f"\nTable {tableName}")
         for key, entry in tableSchema.items():
             print(f"{key} ({entry[1]}): {entry[0]}")
 
-    user = UserSchema(member_dict={"solo_play":1})
-    print('user')
+    user = UserSchema(table_dict={"solo_play":1})
+    for val in user:
+        print('val: ',val)
+    print(user.getTableName())
     print(user)
+    print(user.toDict())
+
+    guild = GuildSchema(reset=False)
+    print(guild.getTableName())
+    print(guild)
+    print(guild.toDict())
     

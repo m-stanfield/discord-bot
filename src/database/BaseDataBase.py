@@ -1,6 +1,6 @@
 from src.logging.logger import Logger
 from src.common.Settings import Settings
-from src.database.Schema import schema_dict, UserSchema, GuildSchema
+from src.database.Schema import schema_dict, UserSchema, GuildSchema, BaseSchema
 import asyncio
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -43,19 +43,18 @@ class BaseDataBase:
         await self.db.dispose()
         logger.info(f"Database was successfully closed")
 
-    async def delete(self, tableName:str):
+    async def deleteTable(self, tableName:str):
+        cmdstr = f"DROP TABLE IF EXISTS {tableName}"
+        await self.execute(cmdstr)
         if tableName in self._schema:
             self._schema.pop(tableName)
-            cmdstr = f"DROP TABLE {tableName}"
-            await self.execute(cmdstr)
             result = True
-        else:
-            result = False        
+        result = True        
         return result
     
     async def _deleteTables(self, tableList:list[str]):
         for table in tableList:
-            await self.delete(table)
+            await self.deleteTable(table)
 
 
     async def _deleteAllTables(self):
@@ -207,7 +206,9 @@ class BaseDataBase:
         result = await self.select(tableName=tableName, values_where=values)
         return len(result) > 0
 
-    async def update(self, tableName:str, values_where:dict[Any], updated_values:dict[Any]):
+    async def update(self, tableName:str, values_where:dict[Any]|UserSchema, updated_values:dict[Any]|UserSchema):
+        values_where:dict = values_where if not(isinstance(values_where,UserSchema)) else values_where.toDict()
+        updated_values:dict = updated_values if not(isinstance(updated_values,UserSchema)) else updated_values.toDict()
         cmdstr = self._updateEntryString(tableName=tableName, values_where=values_where, updated_values=updated_values)
         result = await self.execute(cmdstr)
         return result
