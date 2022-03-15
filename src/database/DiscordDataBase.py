@@ -42,13 +42,19 @@ class DiscordDataBase(BaseDataBase):
         nickname_user = NicknamesSchema(table_dict = member_values)
         nickname_user.drop(columns)
         results = await self.select(tableName=NicknamesSchema.getTableName(), values_where=nickname_user.toDict(), columns=columns)
-        output_string = f".\nNicknames for user: {nickname_user.user_name}```"
         df = pd.DataFrame(results,columns=columns)
         df.sort_values(by=columns[1],inplace=True, ascending=False)
         
         number_values = number_of_nicknames if len(df) > number_of_nicknames else len(df)
-        for i in range(number_values):
-            output_string += f"\nOn {time.ctime(df.iloc[i][columns[1]])} {nickname_user.user_name}'s nickname was changed to {df.iloc[i][columns[0]]}"
+
+        output_string = f".\nNicknames for user: <@{nickname_user.user_id}>"
+        output_string += "```"
+
+        if number_values > 0:
+            for i in range(number_values):
+                output_string += f"\nOn {time.ctime(df.iloc[i][columns[1]])} {nickname_user.user_name}'s nickname was changed to {df.iloc[i][columns[0]]}"
+        else:
+            output_string += "\nNo recorded nicknames for this user"
         output_string += "```"
         return output_string
 
