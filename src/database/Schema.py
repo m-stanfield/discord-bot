@@ -10,13 +10,16 @@ from typing import Any
 @dataclass
 class BaseSchema(ABC):
     table_dict: InitVar[dict | None] = None
+    reset_values: InitVar[bool] = None
+    table_dict: InitVar[dict] = None
 
-    def __init__(self, **kwargs):
-        self.reset()
-
-        for key, value in kwargs.items():
-            if key in self.__dict__.keys():
-                setattr(self, key, value)
+    def __post_init__(self,reset_values:bool=True,table_dict:dict={}):
+        if reset_values:
+            self.reset()
+        if isinstance(table_dict, dict):
+            for key, value in table_dict.items():
+                if key in self.__dict__.keys():
+                    self.__dict__[key] = value
 
 
     @abstractmethod
@@ -107,6 +110,9 @@ class GuildSchema(BaseSchema):
         return search_dict
 
 
+
+
+
 @dataclass
 class UserSchema(BaseSchema):
     guild_name: str = 'default_name'
@@ -127,6 +133,8 @@ class UserSchema(BaseSchema):
     solo_play: int = 0
     audio_path: str = None
 
+
+
     def toSearch(self):
         search_dict = {}
         search_dict['guild_id'] = self.guild_id
@@ -142,6 +150,8 @@ class NicknamesSchema(BaseSchema):
     user_name: str = "default_name"
     nickname: str = "nickname"
     timestamp: float = -1.0
+
+
 
     def setTime(self, timestamp: float = -1):
         self.timestamp = timestamp if timestamp > 0 else time.time()
@@ -171,8 +181,11 @@ SCHEMA_DICT = _generateSchemaDict(var_dict=vars())
 
 
 if __name__ == "__main__":
-    print(SCHEMA_DICT)
-
+    user = UserSchema()
+    print(user)
+    user = UserSchema(volume=3128)
+    print(user)
+    
     for tableName, tableSchema in SCHEMA_DICT.items():
         print(f"\nTable {tableName}")
         for key, entry in tableSchema.items():
@@ -193,3 +206,4 @@ if __name__ == "__main__":
     nick = NicknamesSchema()
     print(nick.timestamp)
     nick2 = NicknamesSchema()
+    
