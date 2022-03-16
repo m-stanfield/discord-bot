@@ -26,20 +26,10 @@ class ListenerCog(commands.Cog):
     def __init__(self, bot):
         self.bot: DiscordBot = bot
 
-    async def _playUserAudio(self, channel:discord.VoiceChannel, member: discord.Member):
-        user:UserSchema = utils.memberToSchema(member)
-        user = await self.bot.db.getValues(user)
-        if user.audio_enabled:
-            if user.custom_audio > np.random.random():
-                file = user.custom_audio_path if os.path.isfile(user.custom_audio_path) else user.default_audio_path
-            else:
-                file = user.default_audio_path
-            await self.bot.playAudio(channel,file,user.volume,user.length)
-
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == Settings.get("BOT_NAME")) and self.bot.voice_clients == []:
-            await self._playUserAudio(after.channel, member)
+            await self.bot.playUserAudio(after.channel, member)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -88,7 +78,7 @@ class ListenerCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        pass
+        await self.bot.db.updateMember(member=member, regen_audio=True)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):

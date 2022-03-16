@@ -6,6 +6,11 @@ import asyncio
 from src.logging.logger import Logger
 from src.database.BaseDataBase import BaseDataBase
 from src.database.DiscordDataBase import DiscordDataBase
+from src.database.Schema import BaseSchema, UserSchema
+import src.common.Utilities as utils
+import numpy as np
+import os
+
 from src.common.Settings import Settings
 
 # cogs
@@ -106,3 +111,13 @@ class DiscordBot(Bot):
             logger.info(
                 f"Bot did not disconnet from discord after {timeout} seconds and timed out")
         return disconnected
+
+    async def playUserAudio(self, channel:discord.VoiceChannel, member: discord.Member):
+        user:UserSchema = utils.memberToSchema(member)
+        user = await self.db.getValues(user)
+        if user.audio_enabled:
+            if user.custom_audio > np.random.random():
+                file = user.custom_audio_path if os.path.isfile(user.custom_audio_path) else user.default_audio_path
+            else:
+                file = user.default_audio_path
+            await self.playAudio(channel,file,user.volume,user.length)
