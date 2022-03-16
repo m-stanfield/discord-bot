@@ -50,7 +50,13 @@ class BaseCog(commands.Cog):
         channel = ctx.author.voice.channel
         if channel is not None:
             member = member if member is not None else ctx.author
-            user = utils.memberToSchema(member=member)
-            user = await self.bot.db.getValues(user=user)
             await self.bot.playUserAudio(channel, member)
+
+    @slash_command()
+    async def say(self, ctx:ApplicationContext, text:str, lang:str='en'):
+        channel = ctx.author.voice.channel
+        if channel is not None:
+            file_name = 'data/audio/say.mp3'
+            self.bot.db.audioGen.generateTTS(file_name, msg=text,lang=lang)
+            await self.bot.playAudio(channel=channel,file_name=file_name,volume=1.0,length=3.0)
 
