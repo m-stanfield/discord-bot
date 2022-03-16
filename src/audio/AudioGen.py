@@ -13,20 +13,19 @@ class AudioGen:
             os.mkdir(self._base_path)
 
     def generateTTS(self, fileName: str, msg: str, **kwargs):
-        kwargs = self._kwargs|kwargs
+        kwargs = self._kwargs | kwargs
         tts = gtts.tts.gTTS(msg, **kwargs)
         path = self._base_path + fileName + ".mp3"
         tts.save(path)
         return path
 
-    def generateNickname(self, user:UserSchema, **kwargs):
-        kwargs = self._kwargs|kwargs
+    def generateNickname(self, user: UserSchema, **kwargs):
+        kwargs = self._kwargs | kwargs
         fileName = f"{user.user_name}_{user.guild_id}_{user.user_id}"
         return self.generateTTS(fileName=fileName, msg=user.nickname, **kwargs)
 
-
     def setKwargs(self, **kwargs):
-        self._kwargs = self._kwargs|kwargs
+        self._kwargs = self._kwargs | kwargs
 
     def getKwargs(self):
         return self._kwargs
@@ -45,12 +44,11 @@ class AudioGen:
 
 
 if __name__ == "__main__":
-    user = UserSchema(volume = 167548932.0, user_name='test_name', nickname='abcd',user_id=1,guild_id=100)
+    user = UserSchema(volume=167548932.0, user_name='test_name',
+                      nickname='abcd', user_id=1, guild_id=100)
     print(user)
     gen = AudioGen(base_path='data/audio/tests/')
     gen.generateTTS('test', 'abcdefghijklmnopqrstuvwxyz')
     gen.generateNickname(user=user)
     gen.setKwargs(tld='co.in')
     gen.generateTTS('test', 'Hello, how are you')
-
-

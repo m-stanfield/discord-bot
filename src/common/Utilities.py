@@ -115,7 +115,7 @@ def roll_dice(args):
             # if 'd' exists send string to be rolled.
             # othewise its constant and just add it to the roll
             if dicestring.find('d') != -1:
-                roll,diceInfo = diceRoller(dicestring)
+                roll, diceInfo = diceRoller(dicestring)
             else:
                 roll = np.array([int(dicestring)])
                 diceInfo = None
@@ -138,7 +138,6 @@ def roll_dice(args):
                         else:
                             output += ' + %d' % num
                     output += ')'
-
 
             else:
                 result -= np.sum(roll)

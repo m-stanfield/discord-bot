@@ -14,9 +14,10 @@ import pandas as pd
 
 logger = Logger(__name__)
 
+
 class DiscordDataBase(BaseDataBase):
     async def createNewMember(self, new_values: UserSchema):
-        result = await self.setEntryValues(new_values.getTableName(),search_values=new_values)
+        result = await self.setEntryValues(new_values.getTableName(), search_values=new_values)
         return result
 
     async def setMemberValues(self, member_values: dict | UserSchema, updated_values: dict[Any] | UserSchema) -> bool:
@@ -36,16 +37,17 @@ class DiscordDataBase(BaseDataBase):
         return success
 
     async def getMemberNicknames(self, member_values: dict | UserSchema, number_of_nicknames: int = 5):
-        columns = ['nickname','timestamp']
+        columns = ['nickname', 'timestamp']
         if isinstance(member_values, BaseSchema):
-            member_values = member_values.toDict() 
-        nickname_user = NicknamesSchema(table_dict = member_values)
+            member_values = member_values.toDict()
+        nickname_user = NicknamesSchema(table_dict=member_values)
         nickname_user.drop(columns)
         results = await self.select(tableName=NicknamesSchema.getTableName(), values_where=nickname_user.toDict(), columns=columns)
-        df = pd.DataFrame(results,columns=columns)
-        df.sort_values(by=columns[1],inplace=True, ascending=False)
-        
-        number_values = number_of_nicknames if len(df) > number_of_nicknames else len(df)
+        df = pd.DataFrame(results, columns=columns)
+        df.sort_values(by=columns[1], inplace=True, ascending=False)
+
+        number_values = number_of_nicknames if len(
+            df) > number_of_nicknames else len(df)
 
         output_string = f".\nNicknames for user: <@{nickname_user.user_id}>"
         output_string += "```"
@@ -58,44 +60,34 @@ class DiscordDataBase(BaseDataBase):
         output_string += "```"
         return output_string
 
-
-
-
-
-    async def _updateUser(self, user:UserSchema, regen_audio:bool):
+    async def _updateUser(self, user: UserSchema, regen_audio: bool):
         nickname_info = NicknamesSchema(table_dict=user.toDict())
         if nickname_info.nickname is None:
             nickname_info.nickname = nickname_info.user_name
         nickname_info.setTime()
-        await self.setEntryValues(user.getTableName(),search_values=user.toSearch(),updated_values=user)
-        await self.setEntryValues(nickname_info.getTableName(),search_values=nickname_info.toSearch(),updated_values=nickname_info)
+        await self.setEntryValues(user.getTableName(), search_values=user.toSearch(), updated_values=user)
+        await self.setEntryValues(nickname_info.getTableName(), search_values=nickname_info.toSearch(), updated_values=nickname_info)
 
         if regen_audio:
             await self._generateAudio(nickname_info)
 
-
-    async def updateMember(self, member:discord.Member, regen_audio:bool):
+    async def updateMember(self, member: discord.Member, regen_audio: bool):
         search_user = utils.memberToSchema(member=member)
         await self._updateUser(user=search_user, regen_audio=regen_audio)
 
-    async def updateGuild(self, guild:discord.Guild, regen_audio:bool):
+    async def updateGuild(self, guild: discord.Guild, regen_audio: bool):
         result = True
         for member in guild.members:
-            temp = self.updateMember(member=member,regen_audio=regen_audio)
-            result = temp if result else False # if previous results were true, return temp
+            temp = self.updateMember(member=member, regen_audio=regen_audio)
+            result = temp if result else False  # if previous results were true, return temp
         return result
 
-    async def updateAllGuilds(self, guilds:list[discord.Guild], regen_audio:bool):
+    async def updateAllGuilds(self, guilds: list[discord.Guild], regen_audio: bool):
         result = True
         for guild in guilds:
-            temp = await self.updateGuild(guild=guild,regen_audio=regen_audio)
-            result = temp if result else False # if previous results were true, return temp
+            temp = await self.updateGuild(guild=guild, regen_audio=regen_audio)
+            result = temp if result else False  # if previous results were true, return temp
         return result
-
-
-
-
-
 
 
 if __name__ == "__main__":

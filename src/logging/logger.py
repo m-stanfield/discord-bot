@@ -8,6 +8,7 @@ import yaml
 # TODO:
 #   1) Implement multiple log files that get cycled
 
+
 class Logger:
     logger_initalized = False
     DEFAULT_DICT = {'path': 'settings/logging.yaml', 'level': None}
@@ -21,7 +22,6 @@ class Logger:
         self.logger = logging.getLogger(name)
 
         self.info(f"Logger loaded in module {name}")
-
 
     @classmethod
     def _initLogger(cls, init_dict):

@@ -41,7 +41,7 @@ class DiscordBot(Bot):
             db = DiscordDataBase(path=path)
         self.db = db
 
-        #adding all cogs to the bot
+        # adding all cogs to the bot
         self.add_cog(BaseCog(self))
         self.add_cog(ListenerCog(self))
         self.add_cog(OwnerCog(self))
@@ -73,23 +73,26 @@ class DiscordBot(Bot):
     async def getConnectionStatus(self):
         return self.connection_status
 
-    async def playAudio(self, channel:discord.VoiceChannel, file_name:str, volume:float=0.1, length:float=3):
-        logger.debug(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+    async def playAudio(self, channel: discord.VoiceChannel, file_name: str, volume: float = 0.1, length: float = 3):
+        logger.debug(
+            f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
 
         if self.voice_clients == []:
             logger.info(f"Playing")
             voice = await channel.connect(timeout=1.0)
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(file_name),volume=volume)
-            voice.play(source,after=lambda e: logger.info('player error: %s' %e) if e else None)
+            source = discord.PCMVolumeTransformer(
+                discord.FFmpegPCMAudio(file_name), volume=volume)
+            voice.play(source, after=lambda e: logger.info(
+                'player error: %s' % e) if e else None)
             await asyncio.sleep(length)
-            await voice.disconnect()   
-            logger.info(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+            await voice.disconnect()
+            logger.info(
+                f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
         else:
-            logger.debug(f"Could not play audio due to a different connection already existing.")
+            logger.debug(
+                f"Could not play audio due to a different connection already existing.")
 
-
-
-    async def disconnect_timeout(self, timeout:float=10.0,interval:float=0.5):
+    async def disconnect_timeout(self, timeout: float = 10.0, interval: float = 0.5):
         start_time = time.time()/1000
         disconnected = False
         while (time.time()/1000 - start_time <= timeout):
@@ -100,5 +103,6 @@ class DiscordBot(Bot):
             else:
                 time.sleep(interval)
         if not(disconnected):
-            logger.info(f"Bot did not disconnet from discord after {timeout} seconds and timed out")
+            logger.info(
+                f"Bot did not disconnet from discord after {timeout} seconds and timed out")
         return disconnected

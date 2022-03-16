@@ -40,7 +40,7 @@ class BaseCog(commands.Cog):
         await ctx.respond(utils.roll_dice(roll_string))
 
     @slash_command()
-    async def nicknames(self, ctx, member: discord.Member | None = None, number:int=5):
+    async def nicknames(self, ctx, member: discord.Member | None = None, number: int = 5):
         member = member if member is not None else ctx.author
         member = utils.memberToSchema(member)
         nickname_str = await self.bot.db.getMemberNicknames(member_values=member, number_of_nicknames=number)

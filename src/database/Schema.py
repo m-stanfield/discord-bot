@@ -13,14 +13,13 @@ class BaseSchema(ABC):
     reset_values: InitVar[bool] = None
     table_dict: InitVar[dict] = None
 
-    def __post_init__(self,reset_values:bool=True,table_dict:dict={}):
+    def __post_init__(self, reset_values: bool = True, table_dict: dict = {}):
         if reset_values:
             self.reset()
         if isinstance(table_dict, dict):
             for key, value in table_dict.items():
                 if key in self.__dict__.keys():
                     self.__dict__[key] = value
-
 
     @abstractmethod
     def toSearch(self):
@@ -62,14 +61,16 @@ class BaseSchema(ABC):
         return self.__dict__.keys()
 
     def allItems(self):
-        return self.__dict__.items() 
+        return self.__dict__.items()
 
     def keys(self):
-        temp_dict = {key:value for key, value in self.__dict__.items() if value is not None}
+        temp_dict = {key: value for key,
+                     value in self.__dict__.items() if value is not None}
         return temp_dict.keys()
 
     def items(self):
-        temp_dict = {key:value for key, value in self.__dict__.items() if value is not None}
+        temp_dict = {key: value for key,
+                     value in self.__dict__.items() if value is not None}
         return temp_dict.items()
 
     def __str__(self):
@@ -110,9 +111,6 @@ class GuildSchema(BaseSchema):
         return search_dict
 
 
-
-
-
 @dataclass
 class UserSchema(BaseSchema):
     guild_name: str = 'default_name'
@@ -133,8 +131,6 @@ class UserSchema(BaseSchema):
     solo_play: int = 0
     audio_path: str = None
 
-
-
     def toSearch(self):
         search_dict = {}
         search_dict['guild_id'] = self.guild_id
@@ -150,8 +146,6 @@ class NicknamesSchema(BaseSchema):
     user_name: str = "default_name"
     nickname: str = "nickname"
     timestamp: float = -1.0
-
-
 
     def setTime(self, timestamp: float = -1):
         self.timestamp = timestamp if timestamp > 0 else time.time()
@@ -185,7 +179,7 @@ if __name__ == "__main__":
     print(user)
     user = UserSchema(volume=3128)
     print(user)
-    
+
     for tableName, tableSchema in SCHEMA_DICT.items():
         print(f"\nTable {tableName}")
         for key, entry in tableSchema.items():
@@ -206,4 +200,3 @@ if __name__ == "__main__":
     nick = NicknamesSchema()
     print(nick.timestamp)
     nick2 = NicknamesSchema()
-    

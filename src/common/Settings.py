@@ -7,7 +7,7 @@ import logging
 
 logger = Logger(__name__)
 ENV_KEYS = ["DISCORD_TOKEN", "SQLITE_DB", "BOT_NAME",
-       "timeout_duration", "timeout_interval"]
+            "timeout_duration", "timeout_interval"]
 
 
 class Settings:
@@ -65,10 +65,10 @@ class Settings:
 
     @classmethod
     def log(cls, level=logging.DEBUG):
-        logger.log(level=level,msg="Logging discord bot initilization settings")
+        logger.log(level=level, msg="Logging discord bot initilization settings")
         key: str
         for key in cls.settings:
-            logger.log(level=level,msg=cls._key2Str(key))
+            logger.log(level=level, msg=cls._key2Str(key))
 
     @classmethod
     def _load_env(cls):
@@ -140,4 +140,3 @@ class Settings:
 
 if __name__ == "__main__":
     Settings.init()
-

@@ -3,6 +3,7 @@ from src.database.Schema import UserSchema
 from src.audio.AudioGen import AudioGen
 import glob
 
+
 class AudioGen_test(unittest.TestCase):
     def test_generateNickname(self):
         audioGen = AudioGen()
