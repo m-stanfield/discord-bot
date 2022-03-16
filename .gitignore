@@ -152,3 +152,4 @@ src/database/examples/test_sqlite3.py
 src/cogs/image_cog.py
 src/cogs/image_cog.py
 src/tests/database/test.db
+src/tests/database/test_schema.db

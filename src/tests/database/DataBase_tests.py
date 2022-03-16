@@ -4,7 +4,7 @@ import asyncio
 from src.database.DiscordDataBase import DiscordDataBase
 
 from src.database.BaseDataBase import BaseDataBase
-from src.database.Schema import UserSchema, schema_dict
+from src.database.Schema import UserSchema, SCHEMA_DICT
 
 class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
     TEST_DATABASE = 'src/tests/database/test.db'
@@ -118,10 +118,10 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
         await db._deleteAllTables()
         await db.init() 
         tables = await db.getTableNames()
-        assert set(tables) == set(schema_dict.keys())
+        assert set(tables) == set(SCHEMA_DICT.keys())
         for table in set(tables):
             columns = await db.getColumnNames(tableName=table)
-            assert set(columns) == set(schema_dict[table])
+            assert set(columns) == set(SCHEMA_DICT[table])
 
     async def test_setEntryValues(self):
  
