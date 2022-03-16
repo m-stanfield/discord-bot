@@ -128,16 +128,15 @@ class BaseDataBase_tests(unittest.IsolatedAsyncioTestCase):
         db:BaseDataBase = self.database(path=self.TEST_DATABASE)
         await db._deleteAllTables()
         await db.init() 
-        user = UserSchema(reset=True)
+        user = UserSchema()
         user.user_id = 178937428979
         user.guild_id = 184387172189
-        updated_user = user.copy()
-        updated_user.ban = 1
-        updated_user.default_nickname = "updated uesr default nick name"
+        user.ban = 1
+        user.default_nickname = "updated uesr default nick name"
         entryExists = await db.checkIfEntryExists(UserSchema.getTableName(),user.toDict())
         assert entryExists == False
-        await db.setEntryValues(tableName=UserSchema.getTableName(),search_values=user.toDict(), updated_values=updated_user.toDict())
-        entryExists = await db.checkIfEntryExists(UserSchema.getTableName(),updated_user.toDict())
+        await db.setEntryValues(tableName=UserSchema.getTableName(),search_values=user.toSearch(), updated_values=user.toDict())
+        entryExists = await db.checkIfEntryExists(UserSchema.getTableName(),user.toDict())
         assert entryExists == True
 
 

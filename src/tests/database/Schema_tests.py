@@ -52,7 +52,6 @@ class Wrapper:
             assert PyToSQLConverter(None) == ("BLOB", None)
 
 
-
 class UserSchema_tests(Wrapper.BaseSchema_tests):
     def __init__(self, *arg, **kwargs):
         super().__init__(*arg, schema=UserSchema, **kwargs)
@@ -69,16 +68,14 @@ class NicknamesSchema_tests(Wrapper.BaseSchema_tests):
 
     def test_timestamp(self):
         current_time = time.time()
-        schema: NicknamesSchema = self._schema(reset=False)
+        schema: NicknamesSchema = self._schema()
         assert schema.timestamp == -1
         schema.setTime()
         assert schema.timestamp >= current_time
 
     def test_setTimestamp(self):
         timestamp = 10
-        schema: NicknamesSchema = self._schema(
-            table_dict={'timestamp': timestamp})
-        print(schema.timestamp, timestamp, 'timestamp')
+        schema: NicknamesSchema = self._schema(timestamp=timestamp)
         assert schema.timestamp == timestamp
 
 

@@ -9,17 +9,15 @@ from typing import Any
 
 @dataclass
 class BaseSchema(ABC):
-    TABLE_NAME = None
-    reset: InitVar[bool] = None
     table_dict: InitVar[dict | None] = None
 
-    def __post_init__(self, reset_schema: bool = True, table_dict: dict | None = None):
-        if reset_schema:
-            self.reset()
-        if table_dict is not None and isinstance(table_dict, dict):
-            for key in table_dict.keys():
-                if key in self.__dict__:
-                    self.__dict__[key] = table_dict[key]
+    def __init__(self, **kwargs):
+        self.reset()
+
+        for key, value in kwargs.items():
+            if key in self.__dict__.keys():
+                setattr(self, key, value)
+
 
     @abstractmethod
     def toSearch(self):
@@ -145,9 +143,6 @@ class NicknamesSchema(BaseSchema):
     nickname: str = "nickname"
     timestamp: float = -1.0
 
-    def __post_init__(self, *args, **kwargs):
-        super().__post_init__(*args, **kwargs)
-
     def setTime(self, timestamp: float = -1):
         self.timestamp = timestamp if timestamp > 0 else time.time()
 
@@ -190,7 +185,7 @@ if __name__ == "__main__":
     print(user)
     print(user.toDict())
 
-    guild = GuildSchema(reset=False)
+    guild = GuildSchema()
     print(guild.getTableName())
     print(guild)
     print(guild.toDict())
