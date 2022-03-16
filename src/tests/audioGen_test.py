@@ -11,9 +11,9 @@ class AudioGen_test(unittest.TestCase):
         user.user_name = "user_name"
         user.user_id = 10
         user.guild_name = "guild_name"
-        audioGen.generateNickname(user=user)
-        fileName = f"{user.user_name}_{user.guild_id}_{user.user_id}.mp3"
-        assert len(glob.glob(audioGen._base_path + "/" + fileName)) > 0
+        generated_file_path = audioGen.generateNickname(user=user)
+        fileName = f"{audioGen._base_path}{user.user_name}_{user.guild_id}_{user.user_id}.mp3"
+        assert fileName == generated_file_path
 
 
 if __name__ == "__main__":

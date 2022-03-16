@@ -15,12 +15,15 @@ class AudioGen:
     def generateTTS(self, fileName: str, msg: str, **kwargs):
         kwargs = self._kwargs|kwargs
         tts = gtts.tts.gTTS(msg, **kwargs)
-        tts.save(self._base_path + fileName + ".mp3")
+        path = self._base_path + fileName + ".mp3"
+        tts.save(path)
+        return path
 
     def generateNickname(self, user:UserSchema, **kwargs):
         kwargs = self._kwargs|kwargs
         fileName = f"{user.user_name}_{user.guild_id}_{user.user_id}"
-        self.generateTTS(fileName=fileName, msg=user.nickname, **kwargs)
+        return self.generateTTS(fileName=fileName, msg=user.nickname, **kwargs)
+
 
     def setKwargs(self, **kwargs):
         self._kwargs = self._kwargs|kwargs
