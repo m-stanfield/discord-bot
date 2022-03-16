@@ -1,4 +1,3 @@
-from dis import disco
 import discord
 from discord.ext.commands import Bot
 import asyncio
