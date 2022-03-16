@@ -1,8 +1,10 @@
 import gtts
 import os
 
-from src.database.Schema import UserSchema
+from src.database.Schema import NicknamesSchema, UserSchema
+from src.logging.logger import Logger
 
+logger = Logger(__name__)
 
 class AudioGen:
     def __init__(self, base_path='data/audio/', **kwargs):
@@ -12,17 +14,23 @@ class AudioGen:
         if not(os.path.isdir(self._base_path)):
             os.mkdir(self._base_path)
 
-    def generateTTS(self, fileName: str, msg: str, **kwargs):
+    def generateTTS(self, path: str, msg: str, **kwargs):
         kwargs = self._kwargs | kwargs
         tts = gtts.tts.gTTS(msg, **kwargs)
-        path = self._base_path + fileName + ".mp3"
         tts.save(path)
         return path
 
-    def generateNickname(self, user: UserSchema, **kwargs):
+    def generateNickname(self, user: UserSchema|NicknamesSchema, **kwargs):
         kwargs = self._kwargs | kwargs
-        fileName = f"{user.user_name}_{user.guild_id}_{user.user_id}"
-        return self.generateTTS(fileName=fileName, msg=user.nickname, **kwargs)
+        fileName = f"default_{user.guild_id}_{user.user_id}"
+        nickname = user.nickname if user.nickname is not None else user.user_name
+        path = os.path.join(self._base_path, fileName + ".mp3")
+        if user.default_audio_path != path or not(os.path.exists(path)):
+            logger.info(f"Generating audio for {user.user_name} at {path}")
+            self.generateTTS(path=path, msg=nickname, **kwargs)  
+        else:
+            logger.info(f"Audio path for {user.user_name} already exists, not regenerating")
+        return path
 
     def setKwargs(self, **kwargs):
         self._kwargs = self._kwargs | kwargs
