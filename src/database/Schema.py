@@ -4,19 +4,19 @@ import dataclasses
 from dataclasses import InitVar
 from copy import deepcopy
 import time
+from types import NoneType
 from typing import Any
 
 
 @dataclass
 class BaseSchema(ABC):
-    table_dict: InitVar[dict | None] = None
-    reset_values: InitVar[bool] = None
-    table_dict: InitVar[dict] = None
+    table_dict: InitVar[dict] = {}
+    reset_values: InitVar[bool] = True
 
-    def __post_init__(self, reset_values: bool = True, table_dict: dict = {}):
+    def __post_init__(self, table_dict:dict, reset_values:bool):
         if reset_values:
             self.reset()
-        if isinstance(table_dict, dict):
+        if type(table_dict) == dict:
             for key, value in table_dict.items():
                 if key in self.__dict__.keys():
                     self.__dict__[key] = value
@@ -51,6 +51,11 @@ class BaseSchema(ABC):
             if val is not None:
                 output[key] = val
         return output
+
+    def fromDict(self, dictionary:dict):
+        for key, value in dictionary.items():
+            if key in self.allKeys():
+                self.__dict__[key] = value
 
     @classmethod
     def getTableName(self):
@@ -129,7 +134,8 @@ class UserSchema(BaseSchema):
     unique_settings: int = 0
     audio_enabled: int = 1
     solo_play: int = 0
-    audio_path: str = None
+    default_audio_path: str = None
+    custom_audio_path: str = None
 
     def toSearch(self):
         search_dict = {}
