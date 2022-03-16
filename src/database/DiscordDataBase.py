@@ -1,3 +1,4 @@
+from re import search
 from src.database.Schema import BaseSchema, GuildSchema, NicknamesSchema, UserSchema
 from src.database.BaseDataBase import BaseDataBase
 from src.common.Settings import Settings
@@ -10,7 +11,6 @@ from src.common import Utilities as utils
 from typing import Any
 import time
 import pandas as pd
-USER_TABLE = 'user'
 
 logger = Logger(__name__)
 
@@ -58,21 +58,42 @@ class DiscordDataBase(BaseDataBase):
         output_string += "```"
         return output_string
 
-    async def _updateNickname(self, before:discord.Member, after:discord.Member):
-         if before.display_name != after.display_name:
-            search_user = utils.memberToSchema(member=after)
-            nickname_info = NicknamesSchema(table_dict=search_user.toDict())
-            if nickname_info.nickname is None:
-                nickname_info.nickname = nickname_info.user_name
-            nickname_info.setTime()
-            search_info = nickname_info.copy()
-            search_info.drop(['nickname'])
-            await self.setEntryValues(nickname_info.getTableName(),search_values=search_info,updated_values=nickname_info)
 
 
-    async def updateUserInformation(self, before:discord.Member, after:discord.Member):
-        # TODO: Generalize to discord.User
-       await self._updateNickname(before, after)
+
+
+    async def _updateUser(self, user:UserSchema, regen_audio:bool):
+        nickname_info = NicknamesSchema(table_dict=user.toDict())
+        if nickname_info.nickname is None:
+            nickname_info.nickname = nickname_info.user_name
+        nickname_info.setTime()
+        await self.setEntryValues(user.getTableName(),search_values=user.toSearch(),updated_values=user)
+        await self.setEntryValues(nickname_info.getTableName(),search_values=nickname_info.toSearch(),updated_values=nickname_info)
+
+        if regen_audio:
+            await self._generateAudio(nickname_info)
+
+
+    async def updateMember(self, member:discord.Member, regen_audio:bool):
+        search_user = utils.memberToSchema(member=member)
+        await self._updateUser(user=search_user, regen_audio=regen_audio)
+
+    async def updateGuild(self, guild:discord.Guild, regen_audio:bool):
+        result = True
+        for member in guild.members:
+            temp = self.updateMember(member=member,regen_audio=regen_audio)
+            result = temp if result else False # if previous results were true, return temp
+        return result
+
+    async def updateAllGuilds(self, guilds:list[discord.Guild], regen_audio:bool):
+        result = True
+        for guild in guilds:
+            temp = await self.updateGuild(guild=guild,regen_audio=regen_audio)
+            result = temp if result else False # if previous results were true, return temp
+        return result
+
+
+
 
 
 
