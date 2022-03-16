@@ -60,3 +60,21 @@ class BaseCog(commands.Cog):
             self.bot.db.audioGen.generateTTS(file_name, msg=text,lang=lang)
             await self.bot.playAudio(channel=channel,file_name=file_name,volume=1.0,length=3.0)
 
+    @slash_command()
+    async def upload_audio(self, ctx:ApplicationContext, member:discord.Member=None):
+        author = utils.memberToSchema(ctx.author)
+        if not(author.superuser) and member is not None:
+            return
+            
+        user = author
+        if author.superuser and member is not None:
+            user = utils.memberToSchema(member)
+
+        print(ctx.message.__dict__)
+
+    @commands.command()
+    async def upload_audio(self,ctx,playerID=None):
+        '''Upload custom audio track for intro. If .mp3 file is attached it will be associated with your account'''
+
+        if ctx.message.attachments:
+            print('there was an attachment')

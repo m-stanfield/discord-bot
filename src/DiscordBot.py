@@ -83,7 +83,7 @@ class DiscordBot(Bot):
             f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
 
         if self.voice_clients == []:
-            logger.info(f"Playing")
+            logger.info(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")            
             voice = await channel.connect(timeout=1.0)
             source = discord.PCMVolumeTransformer(
                 discord.FFmpegPCMAudio(file_name), volume=volume)
@@ -91,8 +91,7 @@ class DiscordBot(Bot):
                 'player error: %s' % e) if e else None)
             await asyncio.sleep(length)
             await voice.disconnect()
-            logger.info(
-                f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+            
         else:
             logger.debug(
                 f"Could not play audio due to a different connection already existing.")
