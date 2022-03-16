@@ -1,6 +1,6 @@
 from src.logging.logger import Logger
 from src.common.Settings import Settings
-from src.database.Schema import schema_dict, UserSchema, GuildSchema, BaseSchema
+from src.database.Schema import SCHEMA_DICT, UserSchema, GuildSchema, BaseSchema
 import asyncio
 from sqlalchemy import text
 from sqlalchemy.engine import Engine
@@ -163,21 +163,27 @@ class BaseDataBase:
         return True
 
     def _buildInsertString(self, table:str, values:dict[str]) -> str:
+        # removing none values from insert
+        values = self._removeNoneFromDict(values)
         cmdstr = f"INSERT INTO {table} ("
 
-        for idx, elem in enumerate(values.keys()):
+        for idx, value in enumerate(values.keys()):
+            if value is None:
+                continue
             if not(idx == 0):
                 cmdstr += ", "
-            cmdstr += elem
+            cmdstr += value
         cmdstr += ") VALUES ("
 
-        for idx, elem in enumerate(values.values()):
+        for idx, value in enumerate(values.values()):
+            if value is None:
+                continue
             if idx > 0:
                 cmdstr += ", "
-            if type(elem) is str:
-                cmdstr += f"'{elem}'"
+            if type(value) is str:
+                cmdstr += f"'{value}'"
             else:
-                cmdstr += str(elem)
+                cmdstr += str(value)
         cmdstr += ")"
         return cmdstr
 
@@ -190,7 +196,7 @@ class BaseDataBase:
 
 
     async def init(self, settings:dict[str,tuple[str,Any]]|None = None, **kwargs):
-        db_settings:dict = schema_dict if settings is None else settings
+        db_settings:dict = SCHEMA_DICT if settings is None else settings
         table_schema:dict
         for key,table_schema in db_settings.items():
             columns = []
@@ -217,8 +223,10 @@ class BaseDataBase:
         result = await self.execute(cmdstr)
         return result
 
-
     def _updateEntryString(self, tableName:str, values_where:dict[Any], updated_values:list[str]):
+        values_where = self._removeNoneFromDict(values_where)
+        updated_values = self._removeNoneFromDict(updated_values)
+
         cmdstr = f"UPDATE {tableName} SET"
         first_entry = True
         for column, value in updated_values.items():
@@ -266,6 +274,10 @@ class BaseDataBase:
 
         entry_exists = await self.checkIfEntryExists(tableName, values = final_values)
         return entry_exists
+        
+
+    def _removeNoneFromDict(self, dictionary:dict) -> dict:
+        return {key:value for key, value in dictionary.items() if value is not None}
 if __name__ == "__main__":
     Settings()
     async def main():
@@ -293,4 +305,7 @@ if __name__ == "__main__":
         #await db.insert('table_one',{"test_INTEGER":100})
         
         await db.close()
+
+
+
     asyncio.run(main())
