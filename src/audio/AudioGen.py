@@ -1,6 +1,8 @@
 import gtts
 import os
 
+from src.database.Schema import UserSchema
+
 
 class AudioGen:
     def __init__(self, base_path='data/audio/', **kwargs):
@@ -11,17 +13,17 @@ class AudioGen:
             os.mkdir(self._base_path)
 
     def generateTTS(self, fileName: str, msg: str, **kwargs):
-        kwargs = {**self._kwargs, **kwargs}
+        kwargs = self._kwargs|kwargs
         tts = gtts.tts.gTTS(msg, **kwargs)
         tts.save(self._base_path + fileName + ".mp3")
 
-    def generateNickname(self, userName: str, nickName: str, serverID: int, userID: int, **kwargs):
-        kwargs = {**self._kwargs, **kwargs}
-        fileName = f"{userName}_{serverID}_{userID}"
-        self.generateTTS(fileName=fileName, msg=nickName, **kwargs)
+    def generateNickname(self, user:UserSchema, **kwargs):
+        kwargs = self._kwargs|kwargs
+        fileName = f"{user.user_name}_{user.guild_id}_{user.user_id}"
+        self.generateTTS(fileName=fileName, msg=user.nickname, **kwargs)
 
     def setKwargs(self, **kwargs):
-        self._kwargs = {**self._kwargs, **kwargs}
+        self._kwargs = self._kwargs|kwargs
 
     def getKwargs(self):
         return self._kwargs
