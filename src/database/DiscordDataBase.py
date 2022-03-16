@@ -62,7 +62,8 @@ class DiscordDataBase(BaseDataBase):
 
     async def _generateAudio(self, user:UserSchema|NicknamesSchema) -> str:
         user = user if isinstance(user, UserSchema) else UserSchema(table_dict=user.toDict())
-        user = await self.getValues(user)
+        old_values = await self.getValues(user)
+        old_values.fromDict(user.toDict())
         return self.audioGen.generateNickname(user)
 
     async def _updateUser(self, user: UserSchema, regen_audio: bool):
