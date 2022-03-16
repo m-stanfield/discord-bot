@@ -69,14 +69,13 @@ class NicknamesSchema_tests(Wrapper.BaseSchema_tests):
     def test_timestamp(self):
         current_time = time.time()
         schema: NicknamesSchema = self._schema()
-        assert schema.timestamp == -1
+        assert schema.timestamp is None
         schema.setTime()
         assert schema.timestamp >= current_time
 
     def test_setTimestamp(self):
         timestamp = 10
-        schema: NicknamesSchema = self._schema(timestamp=timestamp)
-        print(schema.timestamp, timestamp, 'timestamp')
+        schema: NicknamesSchema = self._schema(table_dict={"timestamp":timestamp})
         assert schema.timestamp == timestamp
 
 
