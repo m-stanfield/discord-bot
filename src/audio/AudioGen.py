@@ -42,9 +42,12 @@ class AudioGen:
 
 
 if __name__ == "__main__":
+    user = UserSchema(volume = 167548932.0, user_name='test_name', nickname='abcd',user_id=1,guild_id=100)
+    print(user)
     gen = AudioGen(base_path='data/audio/tests/')
     gen.generateTTS('test', 'abcdefghijklmnopqrstuvwxyz')
-    gen.generateNickname('testname', 'testname, nickname', 1,2)
+    gen.generateNickname(user=user)
     gen.setKwargs(tld='co.in')
     gen.generateTTS('test', 'Hello, how are you')
+
 
