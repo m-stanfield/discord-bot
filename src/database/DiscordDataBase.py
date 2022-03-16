@@ -43,7 +43,7 @@ class DiscordDataBase(BaseDataBase):
         nickname_user = NicknamesSchema(table_dict=member_values)
         nickname_user.drop(columns)
         results = await self.select(tableName=NicknamesSchema.getTableName(), values_where=nickname_user.toDict(), columns=columns)
-        df = pd.DataFrame(results, columns=columns)
+        df = pd.DataFrame(results.values, columns=results.keys())
         df.sort_values(by=columns[1], inplace=True, ascending=False)
 
         number_values = number_of_nicknames if len(
@@ -60,16 +60,23 @@ class DiscordDataBase(BaseDataBase):
         output_string += "```"
         return output_string
 
+    async def _generateAudio(self, user:UserSchema|NicknamesSchema) -> str:
+        user = user if isinstance(user, UserSchema) else UserSchema(table_dict=user.toDict())
+        user = await self.getValues(user)
+        return self.audioGen.generateNickname(user)
+
     async def _updateUser(self, user: UserSchema, regen_audio: bool):
         nickname_info = NicknamesSchema(table_dict=user.toDict())
         if nickname_info.nickname is None:
             nickname_info.nickname = nickname_info.user_name
         nickname_info.setTime()
+
+        if regen_audio:
+           user.default_audio_path = await self._generateAudio(nickname_info)
+
         await self.setEntryValues(user.getTableName(), search_values=user.toSearch(), updated_values=user)
         await self.setEntryValues(nickname_info.getTableName(), search_values=nickname_info.toSearch(), updated_values=nickname_info)
 
-        if regen_audio:
-            await self._generateAudio(nickname_info)
 
     async def updateMember(self, member: discord.Member, regen_audio: bool):
         search_user = utils.memberToSchema(member=member)
@@ -78,7 +85,7 @@ class DiscordDataBase(BaseDataBase):
     async def updateGuild(self, guild: discord.Guild, regen_audio: bool):
         result = True
         for member in guild.members:
-            temp = self.updateMember(member=member, regen_audio=regen_audio)
+            temp = await self.updateMember(member=member, regen_audio=regen_audio)
             result = temp if result else False  # if previous results were true, return temp
         return result
 
@@ -89,6 +96,11 @@ class DiscordDataBase(BaseDataBase):
             result = temp if result else False  # if previous results were true, return temp
         return result
 
+    async def getValues(self, user:BaseSchema):
+        full_user = user.copy()
+        results = await self.select(tableName=user.getTableName(), values_where=user.toSearch(), columns=user.allKeys())
+        full_user.fromDict(results)
+        return full_user
 
 if __name__ == "__main__":
     Settings()
