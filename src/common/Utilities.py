@@ -39,7 +39,6 @@ def memberToSchema(member: discord.Member | None = None, **kwargs) -> UserSchema
                        "nickname": member.nick}
     kwargs = dict([v for v in kwargs.items() if v[0] in member_keys])
     member_dict = member_dict | kwargs
-    print(dict)
     return UserSchema(table_dict=member_dict)
 
 
