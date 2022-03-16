@@ -36,7 +36,7 @@ class ListenerCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         # Note: may be ran multiple times.
-        pass
+        await self.bot.db.updateAllGuilds(self.bot.guilds, regen_audio=True)
 
     @commands.Cog.listener()
     async def on_connect(self):
@@ -84,7 +84,8 @@ class ListenerCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before:discord.Member, after:discord.Member):
-        await self.bot.db.updateUserInformation(before=before, after=after)
+        if before.display_name != after.display_name:
+            await self.bot.db.updateMember(after=after, regen_audio=True)
 
     @commands.Cog.listener()
     async def on_user_update(self, before:discord.User, after:discord.User):
