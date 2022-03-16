@@ -1,5 +1,7 @@
 from src.logging.logger import Logger
 from src.common.Settings import Settings
+from src.audio.AudioGen import AudioGen
+
 from src.database.Schema import SCHEMA_DICT, UserSchema, GuildSchema, BaseSchema
 import asyncio
 from sqlalchemy import text
@@ -18,8 +20,10 @@ class BaseDataBase:
     #DEFAULT_KWARGS = {'path':':memory:'}#
     DEFAULT_KWARGS = {'path': 'data/database/discord_bot.db'}
     db: Engine | None = None
+    audioGen: AudioGen | None = None
 
     def __init__(self, **kwargs):
+        self.audioGen = self.audioGen if self.audioGen is not None else AudioGen(base_path=kwargs.pop('audio_base_path','data/audio'))
         self._kwargs = {**self.DEFAULT_KWARGS, **kwargs}
         self._schema: dict[list[str]] = {}
         if self.db is None:
@@ -63,9 +67,6 @@ class BaseDataBase:
             await self._deleteTables(keys)
         self._schema = {}
 
-    async def _clearAllTables(self):
-        keys = await self.getTableNames()
-
     async def getTableNames(self) -> list[str]:
         cmdstr = "SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%';"
         exe_output = await self.execute(command=cmdstr)
@@ -74,17 +75,22 @@ class BaseDataBase:
             results.append(exe_tuple[0])
         return results
 
-    async def execute(self, command, args=None):
+    async def execute(self, command):
         logger.info(f"SQL Command: {command}")
         async with self.db.begin() as conn:
             result = await conn.execute(text(command))
             return result
 
-    async def select(self, tableName: str, values_where: dict[Any] | None = None, columns: list[str] | None = None) -> list[Any]:
+    async def select(self, tableName: str, values_where: dict[Any] | None = None, columns: list[str] | None = None) -> dict[Any]:
+        columns = list(columns) if columns is not None else self._schema[tableName]
         cmdstr = self._buildSelectString(
             columns=columns, tableName=tableName, values_where=values_where)
         result = await self.execute(cmdstr)
         result = result.all()
+        if result is not None and len(result) != 0:
+            result = {list(columns)[i]:result[0][i] for i in range(len(result[0]))}
+        else:
+            result = {}
         return result
 
     def _buildSelectString(self, tableName: str, values_where: dict[Any] | None = None, columns: list[str] | None = None) -> str:
@@ -208,7 +214,7 @@ class BaseDataBase:
 
     async def checkIfEntryExists(self, tableName: str, values: dict[Any]):
         result = await self.select(tableName=tableName, values_where=values)
-        return len(result) > 0
+        return len(dict(result).keys()) > 0
 
     async def update(self, tableName: str, values_where: dict[Any] | UserSchema, updated_values: dict[Any] | UserSchema):
         values_where: dict = values_where if not(isinstance(
