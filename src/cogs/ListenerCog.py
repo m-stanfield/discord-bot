@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 from discord.client import Client
 import discord
 import asyncio
+from src.database.Schema import UserSchema
 from src.database.BaseDataBase import BaseDataBase
 from src.database.DiscordDataBase import DiscordDataBase
 from src.common.Settings import Settings
@@ -13,7 +14,8 @@ from discord.commands import slash_command
 from discord.ext.commands.context import Context
 from src.logging.logger import Logger
 import datetime
-
+import numpy as np
+import os
 logger = Logger(__name__)
 
 if TYPE_CHECKING:
@@ -24,10 +26,20 @@ class ListenerCog(commands.Cog):
     def __init__(self, bot):
         self.bot: DiscordBot = bot
 
+    async def _playUserAudio(self, channel:discord.VoiceChannel, member: discord.Member):
+        user:UserSchema = utils.memberToSchema(member)
+        user = await self.bot.db.getValues(user)
+        if user.audio_enabled:
+            if user.custom_audio > np.random.random():
+                file = user.custom_audio_path if os.path.isfile(user.custom_audio_path) else user.default_audio_path
+            else:
+                file = user.default_audio_path
+            await self.bot.playAudio(channel,file,user.volume,user.length)
+
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == Settings.get("BOT_NAME")) and self.bot.voice_clients == []:
-            pass
+            await self._playUserAudio(after.channel, member)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -85,7 +97,7 @@ class ListenerCog(commands.Cog):
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
         if before.display_name != after.display_name:
-            await self.bot.db.updateMember(after=after, regen_audio=True)
+            await self.bot.db.updateMember(member=after, regen_audio=True)
 
     @commands.Cog.listener()
     async def on_user_update(self, before: discord.User, after: discord.User):
