@@ -57,6 +57,9 @@ class BaseSchema(ABC):
             if key in self.allKeys():
                 self.__dict__[key] = value
 
+    def fromSchema(self, schema):
+        self.fromDict(schema.toDict())
+
     @classmethod
     def getTableName(self):
         name = self.__name__.replace("Schema", "").lower()
@@ -204,5 +207,15 @@ if __name__ == "__main__":
     print(guild.toDict())
 
     nick = NicknamesSchema()
+    nick.guild_id = 1
+    nick.guild_name = "m"
+    nick.user_id = 20
+    nick.user_name = "jdisfao"
     print(nick.timestamp)
     nick2 = NicknamesSchema()
+
+    userfromnick = UserSchema()
+    print(userfromnick)
+
+    userfromnick.fromSchema(nick)
+    print(userfromnick)
