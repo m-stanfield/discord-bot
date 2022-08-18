@@ -1,6 +1,6 @@
 import discord
 from discord.ext.commands.context import Context
-from src.database import Guilds, Settings, Users, Nicknames
+from src.database import GuildsTable, SettingsTable, UsersTable, NicknamesTable
 from typing import Any
 from src.logger import Logger
 import numpy as np

@@ -1,0 +1,7 @@
+images:
+  sticker: "data/images/stickers/"
+audio:
+  nicknames: "data/audio/nicknames/"
+  custom: "data/audio/custom/"
+  sayin: "data/audio/say_in/"
+database: "data/database/"

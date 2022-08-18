@@ -2,7 +2,8 @@ from __future__ import annotations
 import argparse
 import dotenv
 import os
-
+import yaml
+from yaml.loader import SafeLoader
 from src.logger import Logger
 import logging
 
@@ -19,6 +20,7 @@ class Settings:
             self._initializeSettings()
             self._load_env()
             self._parseArgs()
+            self._loadDataYaml()
             self.log()
 
     @classmethod
@@ -45,8 +47,15 @@ class Settings:
         return Settings()
 
     @classmethod
-    def get(cls, key: str):
-        return cls.settings[key]
+    def get(cls, keys: str|list):
+        result = None
+        if type(keys) is list:
+            result = cls.getSettings()
+            for key in keys:
+                result = result[key]
+        else:
+            result = cls.settings[keys] if keys in cls.settings else None
+        return result
 
     @classmethod
     def getSettings(cls):
@@ -102,11 +111,35 @@ class Settings:
         for key in vars(args):
             cls.settings[key] = vars(args)[key]
 
+    @classmethod
+    def _loadDataYaml(cls):
+        def get_dirs(input_dict:dict) -> str:
+            for key, value in input_dict.items():
+                if isinstance(value, dict):
+                    for val in get_dirs(value):
+                        yield val
+                else:
+                    yield value
+
+        with open('settings/data.yaml') as f:
+            a = yaml.load(f, Loader=SafeLoader)
+        cls.settings['data'] = a
+        for directory in get_dirs(cls.settings['data']):
+            if not(os.path.isdir(directory)):
+                os.makedirs(directory)
+
+
+        
+
 Settings.init()
 
 
 if __name__ == "__main__":
-    Settings.init()
-    settings1 = Settings()
-    settings2 = Settings()
+    def main():
+        Settings.init()
+        settings1 = Settings()
+        settings2 = Settings()
+        print(settings1)
+        print(settings1.get(['data','images','sticker']))
+    main()
 

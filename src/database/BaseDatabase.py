@@ -16,7 +16,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import relationship
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import create_async_engine
-from src.database.schema import Base, USER_TABLE, GUILD_TABLE, SETTING_TABLE, NICKNAME_TABLE, Guilds, Users, Nicknames, Settings
+from src.database.schema import Base, USER_TABLE, GUILD_TABLE, SETTING_TABLE, NICKNAME_TABLE, GuildsTable, UsersTable, NicknamesTable, SettingsTable
 
 logger = Logger(__name__)
 
@@ -34,7 +34,6 @@ class BaseDataBase:
                 database_loc = ":memory:"
             else:
                 database_loc = os.path.join(database_path, database_name)
-                print(database_loc)
                 if not(os.path.isdir(database_path)):
                     os.mkdir(database_path)
             cls._engine: sqlalchemy.engine.Engine = create_async_engine(f'sqlite+aiosqlite:///{database_loc}')
@@ -44,22 +43,33 @@ class BaseDataBase:
             cls._async_session = sessionmaker(cls._engine, expire_on_commit=False, class_=AsyncSession)        
         return cls()
 
-    async def insert(self, row):
+    async def insert(self, row, session:Session|None=None):
+        if row is None:
+            return
+            
         rows = row if type(row) == list else [row]
 
-        async with self._async_session() as session:
+        if session:
             async with session.begin():
                 session.add_all(rows)
+        else:
+            async with self._async_session() as session:  
+                async with session.begin():
+                    session.add_all(rows)
 
     async def getTable(self, table):
         async with self._async_session() as session:
             stmt = select(table)
-            result = await self.execute(session, stmt)
+            result = await self.execute(stmt=stmt, session=session)
         return result
 
 
-    async def execute(self, session:Session, stmt:str):
-        sql_results = await session.execute(stmt)
+    async def execute(self, stmt:str, session:Session|None = None):
+        if session:
+            sql_results = await session.execute(stmt)
+        else:
+            async with self._async_session() as session:  
+                sql_results = await session.execute(stmt)
         results = []
         for row in sql_results:
             results.append(row)

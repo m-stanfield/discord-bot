@@ -1,7 +1,5 @@
 # external imports
-from src.Settings import Settings
-from src.logger import Logger
-from src.DiscordBot import DiscordBot
+
 import asyncio
 import time
 import importlib
@@ -13,6 +11,9 @@ PRELOADED_MODULES = set(sys.modules.values())
 
 
 # Imports for code in this project
+from src.Settings import Settings
+from src.logger import Logger
+from src.DiscordBot import DiscordBot
 Settings.init()
 logger = Logger(__name__)
 
@@ -28,6 +29,7 @@ def startup_message():
 
 
 def reload_modules():
+    
     my_modules = [module for module in (set(sys.modules.values(
     ))-PRELOADED_MODULES) if module.__name__.startswith("src")]
     log_msg = "Reloading Modules\n"
@@ -52,7 +54,7 @@ async def main():
     generate_directories()
     while run_status:
         logger.info("Launching Bot")
-        bot = await DiscordBot.initialize_bot(SQLITE_DB_PATH=Settings.get('SQLITE_DB_PATH'), SQLITE_DB_FILE=Settings.get('SQLITE_DB_FILE'))
+        bot = await DiscordBot.initialize_bot(SQLITE_DB_PATH=Settings.get(['data','database']), SQLITE_DB_FILE=Settings.get('SQLITE_DB_FILE'))
         await bot.runBot()
         run_status = await bot.getRunStatus()
         await bot.disconnect_timeout(timeout=float(Settings.get("timeout_duration")), interval=float(Settings.get('timeout_interval')))
@@ -67,7 +69,7 @@ async def main():
 
 
 def generate_directories() -> bool:
-    directories = [ "logs/nicknames", "settings", "data/audio/clips","data/audio/users", "data/images"]
+    directories = [ "logs/nicknames", "settings"]
     successful = True
     for dir in directories:
         if not(os.path.isdir(dir)):

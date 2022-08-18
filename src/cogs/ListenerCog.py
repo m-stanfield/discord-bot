@@ -1,21 +1,11 @@
-from typing import TYPE_CHECKING
-from discord.client import Client
-import discord
-import asyncio
-from src.database.Schema import UserSchema
-from src.database.BaseDataBase import BaseDataBase
-from src.database.DiscordDataBase import DiscordDataBase
-from src.common.Settings import Settings
-import src.common.Utilities as utils
-from discord.ext import commands
-from discord.ext.commands import Bot
-import time
-from discord.commands import slash_command
-from discord.ext.commands.context import Context
-from src.logging.logger import Logger
 import datetime
-import numpy as np
-import os
+from typing import TYPE_CHECKING
+
+import discord
+from discord.ext import commands
+from src.logger import Logger
+from src.Settings import Settings
+
 logger = Logger(__name__)
 
 if TYPE_CHECKING:
@@ -24,12 +14,14 @@ if TYPE_CHECKING:
 
 class ListenerCog(commands.Cog):
     def __init__(self, bot):
+        logger.info("Loading Listener Cog")
+
         self.bot: DiscordBot = bot
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-        if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == Settings.get("BOT_NAME")) and self.bot.voice_clients == []:
-            await self.bot.playUserAudio(after.channel, member)
+        if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == Settings.get("BOT_NAME")):
+            await self.bot.addMethodToQueue(self.bot.playUserAudio, after.channel, member)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -38,7 +30,9 @@ class ListenerCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         # Note: may be ran multiple times.
-        await self.bot.db.updateAllGuilds(self.bot.guilds, regen_audio=True)
+        logger.info("Updating all guild information")
+        await self.bot.db.updateAllGuilds(guilds=self.bot.guilds, regenerate_audio=True)
+        logger.info("Completed updating all guild information")
 
     @commands.Cog.listener()
     async def on_connect(self):
@@ -78,7 +72,8 @@ class ListenerCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        await self.bot.db.updateMember(member=member, regen_audio=True)
+        await self.bot.addMethodToQueue(self.bot.db.updateMember, member=member)
+        await self.bot.addMethodToQueue(self.bot.db.generateMemberAudio, member=member)
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
@@ -86,8 +81,9 @@ class ListenerCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before: discord.Member, after: discord.Member):
-        if before.display_name != after.display_name:
-            await self.bot.db.updateMember(member=after, regen_audio=True)
+        successful = True
+        logger.info("Attempting to update member info for member %s in guild %s"%(after.name, after.guild))
+        successful = successful and await self.bot.addMethodToQueue(self.bot.db.updateMember, member=after,previous_member=before, regenerate_audio=True)
 
     @commands.Cog.listener()
     async def on_user_update(self, before: discord.User, after: discord.User):

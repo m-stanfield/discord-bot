@@ -3,13 +3,16 @@ import discord
 from discord.ext.commands import Bot
 import asyncio
 from discord.ext import tasks, commands
-from src.database import BaseDataBase
+from src.cogs import ListenerCog, BaseCog, AudioCog
+from src.database import DiscordDatabase, SettingsTable
 from src.logger import Logger
 from src.Settings import Settings
-from src.cogs.BaseCog import BaseCog
 import time
 from typing import Callable
 import discord
+import numpy as np
+import os
+import inspect
 
 logger = Logger(__name__)
 
@@ -31,28 +34,30 @@ class DiscordBot(Bot):
             intents=kwargs.pop("intents")
         )
 
-        self.connection_status = False
 
         # adding all cogs to the bot
         self.add_cog(BaseCog(self))
 
-
+        self.add_cog(ListenerCog(self))
+        self.add_cog(AudioCog(self))
+        self.connection_status = False
         self.run_status = True
 
         
 
-    def setDatabase(self, db:BaseDataBase):
+    def setDatabase(self, db:DiscordDatabase):
         self.db = db
+
     @staticmethod
     async def initialize_bot(**kwargs) -> DiscordBot:
-        db: BaseDataBase = None if "db" not in kwargs else kwargs.pop('db')
-        if not(isinstance(db, BaseDataBase)):
+
+        db: DiscordDatabase = None if "db" not in kwargs else kwargs.pop('db')
+        if not(isinstance(db, DiscordDatabase)):
             database_path =  kwargs.pop("SQLITE_DB_PATH", Settings.get("SQLITE_DB_PATH"))
             database_name =  kwargs.pop("SQLITE_DB_FILE", Settings.get("SQLITE_DB_FILE"))
-            db = await BaseDataBase.initialize_database(database_path=database_path,database_name=database_name)
+            db = await DiscordDatabase.initialize_database(database_path=database_path,database_name=database_name)
         bot = DiscordBot(**kwargs)
         bot.setDatabase(db)
-
         return bot
 
     async def close(self):
@@ -77,6 +82,13 @@ class DiscordBot(Bot):
 
     async def getConnectionStatus(self):
         return self.connection_status
+
+    async def playUserAudio(self, channel: discord.VoiceChannel, member:discord.Member, custom_audio:bool|None = False):
+        settings:SettingsTable = await self.db.getSettingEntry(member)
+        custom_audio:bool = (np.random.uniform(0, 1.0) > settings.custom_audio_relative_frequency) if custom_audio else False
+        file_name:str = await self.db.getUserAudioFile(member = member, custom_audio=custom_audio)
+        if file_name is not None and os.path.isfile(file_name):
+            await self.playAudio(channel, file_name=file_name, volume=settings.volume, length=settings.length)
 
     async def playAudio(self, channel: discord.VoiceChannel, file_name: str, volume: float = 0.1, length: float = 3):
         logger.debug(
@@ -122,16 +134,29 @@ class DiscordBot(Bot):
         logger.debug("Queuing: " + str(item))
         return await self.addItemToQueue(item)
 
+    def findMemberInVoiceChannel(self, ctx:discord.ApplicationContext) -> discord.VoiceChannel:
+        for channel in ctx.guild.voice_channels:
+            for member in channel.members:
+                if member==ctx.author:
+                    return channel
+        return None
+
     @tasks.loop(seconds=0.05)
     async def processQueue(self):
-            try:
-                if not(self.queue.empty()):
+        try:
+            if not(self.queue.empty()):
 
-                    items = self.queue.get()
-                    queue_items = await items
-                    await queue_items[0](*queue_items[1], **queue_items[2])
-            except Exception as err:
-                logger.error(err, raiseError=err)
+                items = self.queue.get()
+                method, args, kwargs = await items
+                if (inspect.iscoroutinefunction(method)):
+                    try:
+                        await method(*args, **kwargs)
+                    except Exception as e:
+                        logger.critical(e)
+                else:
+                    method(*args, **kwargs)
+        except Exception as err:
+            logger.error(err, raiseError=err)
 
 
 

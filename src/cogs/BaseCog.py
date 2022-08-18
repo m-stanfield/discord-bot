@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING
 from discord.client import Client
 import discord
 import asyncio
+from src.database.schema import NicknamesTable
 from src.database import BaseDataBase
 from src.Settings import Settings
 from discord.ext import commands
@@ -24,6 +25,8 @@ if TYPE_CHECKING:
 
 class BaseCog(commands.Cog):
     def __init__(self, bot):
+        logger.info("Loading Base Cog")
+
         self.bot: DiscordBot = bot
 
     @slash_command()
@@ -39,5 +42,17 @@ class BaseCog(commands.Cog):
     async def roll(self, ctx:ApplicationContext, roll_string=""):
         '''Rolls dice. !roll <dice string>. Dice string exmaple: 1d20 -4d2 + 8 -2d2'''
         await self.bot.addMethodToQueue(ctx.respond, utils.roll_dice(roll_string))
+
+    @slash_command()
+    async def nicknames(self, ctx:ApplicationContext, number:int = 10):
+        nicknames = await self.bot.db.getNicknameEntries(ctx.author,number_of_entries=number)
+        if nicknames is None:
+            return
+        output = "```Nicknames"
+        entry:NicknamesTable
+
+        for entry in nicknames:
+            output += f"\n{entry.time}: {entry.display_name}"
+        await self.bot.addMethodToQueue(ctx.respond, output)
          
 

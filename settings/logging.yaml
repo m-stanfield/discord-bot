@@ -92,7 +92,7 @@ loggers:
           handlers: [console, info_file_handler, error_file_handler]
           propagate: no
 
-    src.cogs.OwnerCog:
+    src.cogs.AdminCog:
           level: DEBUG
           handlers: [console, info_file_handler, error_file_handler]
           propagate: no
@@ -102,7 +102,7 @@ loggers:
           handlers: [console, info_file_handler, error_file_handler]
           propagate: no
 
-    src.cogs.ReactRoleCog:
+    src.cogs.AudioCog:
           level: DEBUG
           handlers: [console, info_file_handler, error_file_handler]
           propagate: no
