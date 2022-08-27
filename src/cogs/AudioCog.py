@@ -74,6 +74,19 @@ class AudioCog(commands.Cog):
             await session.commit()
 
     @slash_command()
+    async def custom_audio(self, ctx:ApplicationContext, ratio:float = 0.3):
+        await ctx.delete()
+        if not(type(ratio) == float):
+            return
+
+        updated_member:discord.Member = ctx.author
+        logger.info(f"Setting custom audio relative frequency for member {updated_member.id} on {updated_member.guild.id} to a length of {ratio}")
+        async with self.bot.db._async_session() as session: 
+            setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
+            setting.custom_audio_relative_frequency = ratio
+            await session.commit()
+
+    @slash_command()
     async def solo_play(self, ctx:ApplicationContext, enable:bool):
         await ctx.delete()
         if not(type(enable) == bool):
