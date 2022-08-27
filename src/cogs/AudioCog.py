@@ -74,7 +74,7 @@ class AudioCog(commands.Cog):
             await session.commit()
 
     @slash_command()
-    async def custom_audio(self, ctx:ApplicationContext, ratio:float = 0.3):
+    async def custom_audio(self, ctx:ApplicationContext, ratio:float):
         await ctx.delete()
         if not(type(ratio) == float):
             return
