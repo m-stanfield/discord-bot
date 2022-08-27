@@ -48,7 +48,7 @@ class AudioCog(commands.Cog):
         await self.bot.addMethodToQueue(self.bot.playUserAudio, channel, member, custom_audio = custom_audio)
 
     @slash_command()
-    async def volume(self, ctx:ApplicationContext, volume:float = 0.3, member:discord.Member|None = None):
+    async def volume(self, ctx:ApplicationContext, volume:float):
         await ctx.delete()
         if not(type(volume) == float):
             return
@@ -61,13 +61,13 @@ class AudioCog(commands.Cog):
             await session.commit()
 
     @slash_command()
-    async def length(self, ctx:ApplicationContext, length:float = 0.3, member:discord.Member|None = None):
+    async def length(self, ctx:ApplicationContext, length:float):
         await ctx.delete()
         if not(type(length) == float):
             return
 
         updated_member:discord.Member = ctx.author
-        logger.info(f"Setting volume for member {updated_member.id} on {updated_member.guild.id} to a length of {length}")
+        logger.info(f"Setting length for member {updated_member.id} on {updated_member.guild.id} to a length of {length}")
         async with self.bot.db._async_session() as session: 
             setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
             setting.length = length
