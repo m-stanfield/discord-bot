@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from src.DiscordBot import DiscordBot
 
 
-class BaseCog(commands.Cog):
+class AdminCog(commands.Cog):
     def __init__(self, bot):
         logger.info("Loading Admin Cog")
 

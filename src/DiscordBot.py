@@ -3,7 +3,7 @@ import discord
 from discord.ext.commands import Bot
 import asyncio
 from discord.ext import tasks, commands
-from src.cogs import ListenerCog, BaseCog, AudioCog
+from src.cogs import ListenerCog, BaseCog, AudioCog, AdminCog
 from src.database import DiscordDatabase, SettingsTable
 from src.logger import Logger
 from src.Settings import Settings
@@ -37,7 +37,7 @@ class DiscordBot(Bot):
 
         # adding all cogs to the bot
         self.add_cog(BaseCog(self))
-
+        self.add_cog(AdminCog(self))
         self.add_cog(ListenerCog(self))
         self.add_cog(AudioCog(self))
         self.connection_status = False
