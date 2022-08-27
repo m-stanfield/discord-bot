@@ -5,6 +5,7 @@ import discord
 from discord.ext import commands
 from src.logger import Logger
 from src.Settings import Settings
+import time
 
 logger = Logger(__name__)
 
@@ -21,7 +22,8 @@ class ListenerCog(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
         if not(after.channel == None) and not(after.channel == before.channel) and not(member.name in Settings.get("BOT_NAMES")):
-            await self.bot.addMethodToQueue(self.bot.playUserAudio, after.channel, member)
+            queued_time = time.time()
+            await self.bot.addMethodToQueue(self.bot.playUserAudio, after.channel, member, queued_time=queued_time)
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

@@ -9,7 +9,7 @@ import logging
 
 logger = Logger(__name__)
 ENV_KEYS = ["DISCORD_TOKEN", "SQLITE_DB_FILE","SQLITE_DB_PATH", "BOT_NAMES",
-            "timeout_duration", "timeout_interval"]
+            "timeout_duration", "timeout_interval", "MAX_PLAY_DELAY"]
 
 class Settings:
     settings: dict = None

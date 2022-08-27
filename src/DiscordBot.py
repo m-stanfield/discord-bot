@@ -84,19 +84,22 @@ class DiscordBot(Bot):
     async def getConnectionStatus(self):
         return self.connection_status
 
-    async def playUserAudio(self, channel: discord.VoiceChannel, member:discord.Member, custom_audio:bool|None = None):
+    async def playUserAudio(self, channel: discord.VoiceChannel, member:discord.Member, custom_audio:bool|None = None, queued_time:float|None = None):
         settings:SettingsTable = await self.db.getSettingEntry(member)
         percent_chance = np.random.uniform(0, 1.0)
         custom_audio:bool = (percent_chance < settings.custom_audio_relative_frequency) if custom_audio is None else custom_audio
         file_name:str = await self.db.getUserAudioFile(member = member, custom_audio=custom_audio)
         if file_name is not None and os.path.isfile(file_name):
-            await self.playAudio(channel, file_name=file_name, volume=settings.volume, length=settings.length)
+            await self.playAudio(channel, file_name=file_name, volume=settings.volume, length=settings.length, queued_time=queued_time)
 
-    async def playAudio(self, channel: discord.VoiceChannel, file_name: str, volume: float = 0.1, length: float = 3):
+    async def playAudio(self, channel: discord.VoiceChannel, file_name: str, volume: float = 0.1, length: float = 3, queued_time:float|None = None):
         logger.debug(
             f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+        runtime = time.time()
+        max_delay = float(Settings.get("MAX_PLAY_DELAY"))
+        within_allowed_time = (runtime - queued_time) < max_delay
 
-        if self.voice_clients == []:
+        if self.voice_clients == [] and within_allowed_time:
             logger.info(f"Playing")
             voice = await channel.connect(timeout=1.0)
             source = discord.PCMVolumeTransformer(
@@ -107,6 +110,8 @@ class DiscordBot(Bot):
             await voice.disconnect()
             logger.info(
                 f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+        elif not(within_allowed_time):
+            logger.info(f"Could not play audio file due to queued time ({queued_time}) and run time ({runtime}) being greater than the maximum allowed time ({max_delay}).")
         else:
             logger.debug(
                 f"Could not play audio due to a different connection already existing.")
