@@ -8,9 +8,11 @@ from discord.ext import commands
 from discord.ext.commands import Bot
 import time
 from discord.commands import slash_command, ApplicationContext
+from discord import option
 from src.logger import Logger
 import inspirobot
 import os
+import pathlib
 
 import src.Utilities as utils
 
@@ -70,5 +72,40 @@ class AudioCog(commands.Cog):
             setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
             setting.length = length
             await session.commit()
+
+    @slash_command()
+    async def solo_play(self, ctx:ApplicationContext, enable:bool):
+        await ctx.delete()
+        if not(type(enable) == bool):
+            ctx.author.send("Improper slash command arguments. Solo play slash command requires a true/false value.")
+            return
+
+        updated_member:discord.Member = ctx.author
+        logger.info(f"Setting solo play for member {updated_member.id} on {updated_member.guild.id} to {enable}")
+        async with self.bot.db._async_session() as session: 
+            setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
+            setting.solo_audio_play = enable
+            await session.commit()
+
+    @slash_command()
+    @option("attachment", discord.Attachment, description="The mp3 file to set as your custom audio.")
+    async def upload_audio(self, ctx:ApplicationContext, attachment: discord.Attachment):
+        await ctx.delete()
+        memberForAudio = ctx.author # TODO: add optional super call
+        if not(attachment):
+            await ctx.author.send("No attachment was sent with custom audio upload slash command")
+            return
+        if not(attachment.filename.endswith(".mp3")):
+            await ctx.author.send("Audio files must be .mp3 files")
+            return
+        await self.bot.addMethodToQueue(self._upload_audio,ctx=ctx, attachment=attachment, member = memberForAudio)
+
+    async def _upload_audio(self, ctx:ApplicationContext, attachment: discord.Attachment, member:discord.Member):
+        base_path = Settings.get(['data','audio','custom'])
+        path = os.path.join(base_path, self.bot.db._generateMP3Name(member))
+        await attachment.save(pathlib.Path(path))
+        file = await attachment.to_file()
+        await member.send(f"The following audio file has been set as your custom audio on {ctx.guild}",file=file)
+
           
 
