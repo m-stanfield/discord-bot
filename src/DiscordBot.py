@@ -83,9 +83,9 @@ class DiscordBot(Bot):
     async def getConnectionStatus(self):
         return self.connection_status
 
-    async def playUserAudio(self, channel: discord.VoiceChannel, member:discord.Member, custom_audio:bool|None = False):
+    async def playUserAudio(self, channel: discord.VoiceChannel, member:discord.Member, custom_audio:bool|None = None):
         settings:SettingsTable = await self.db.getSettingEntry(member)
-        custom_audio:bool = (np.random.uniform(0, 1.0) > settings.custom_audio_relative_frequency) if custom_audio else False
+        custom_audio:bool = (np.random.uniform(0, 1.0) > settings.custom_audio_relative_frequency) if custom_audio is None else custom_audio
         file_name:str = await self.db.getUserAudioFile(member = member, custom_audio=custom_audio)
         if file_name is not None and os.path.isfile(file_name):
             await self.playAudio(channel, file_name=file_name, volume=settings.volume, length=settings.length)
