@@ -8,7 +8,7 @@ from src.logger import Logger
 import logging
 
 logger = Logger(__name__)
-ENV_KEYS = ["DISCORD_TOKEN", "SQLITE_DB_FILE","SQLITE_DB_PATH", "BOT_NAME",
+ENV_KEYS = ["DISCORD_TOKEN", "SQLITE_DB_FILE","SQLITE_DB_PATH", "BOT_NAMES",
             "timeout_duration", "timeout_interval"]
 
 class Settings:

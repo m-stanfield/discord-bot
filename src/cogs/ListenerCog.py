@@ -20,7 +20,7 @@ class ListenerCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
-        if not(after.channel == None) and not(after.channel == before.channel) and not(member.name == Settings.get("BOT_NAME")):
+        if not(after.channel == None) and not(after.channel == before.channel) and not(member.name in Settings.get("BOT_NAMES")):
             await self.bot.addMethodToQueue(self.bot.playUserAudio, after.channel, member)
 
     @commands.Cog.listener()
