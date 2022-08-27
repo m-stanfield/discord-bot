@@ -42,6 +42,7 @@ class DiscordBot(Bot):
         self.add_cog(AudioCog(self))
         self.connection_status = False
         self.run_status = True
+        self.ready = False
 
         
 
@@ -129,6 +130,8 @@ class DiscordBot(Bot):
         await self.queue.put(item)
 
     async def addMethodToQueue(self, func:Callable, *args, **kwargs):
+        if not(self.ready):
+            return
         if 'kwargs' in kwargs:
             kwargs = kwargs.pop('kwargs') | kwargs
         item = (func, args, kwargs)

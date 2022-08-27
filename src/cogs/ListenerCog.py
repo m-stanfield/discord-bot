@@ -33,6 +33,7 @@ class ListenerCog(commands.Cog):
         logger.info("Updating all guild information")
         await self.bot.db.updateAllGuilds(guilds=self.bot.guilds, regenerate_audio=True)
         logger.info("Completed updating all guild information")
+        self.bot.ready = True
 
     @commands.Cog.listener()
     async def on_connect(self):
