@@ -87,9 +87,13 @@ class DiscordBot(Bot):
     async def playUserAudio(self, channel: discord.VoiceChannel, member:discord.Member, custom_audio:bool|None = None, queued_time:float|None = None):
         settings:SettingsTable = await self.db.getSettingEntry(member)
         percent_chance = np.random.uniform(0, 1.0)
+        log_string = f"Attemping to play a audio clip with custom_audio being {custom_audio} with a relative frequency of {settings.custom_audio_relative_frequency}  and a rolled value of {percent_chance}."
+        logger.info(log_string)
+
         custom_audio:bool = (percent_chance < settings.custom_audio_relative_frequency) if custom_audio is None else custom_audio
         file_name:str = await self.db.getUserAudioFile(member = member, custom_audio=custom_audio)
         if file_name is not None and os.path.isfile(file_name):
+
             await self.playAudio(channel, file_name=file_name, volume=settings.volume, length=settings.length, queued_time=queued_time)
 
     async def playAudio(self, channel: discord.VoiceChannel, file_name: str, volume: float = 0.1, length: float = 3, queued_time:float|None = None):
