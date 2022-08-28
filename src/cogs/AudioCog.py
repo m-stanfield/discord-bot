@@ -44,8 +44,9 @@ class AudioCog(commands.Cog):
     @slash_command()
     async def play(self, ctx:ApplicationContext, member:discord.Member, custom_audio:bool|None = None):
         channel:discord.VoiceChannel = self.bot.findMemberInVoiceChannel(ctx=ctx)
+        queued_time = time.time()
         await ctx.delete()
-        await self.bot.addMethodToQueue(self.bot.playUserAudio, channel, member, custom_audio = custom_audio)
+        await self.bot.addMethodToQueue(self.bot.playUserAudio, channel, member, custom_audio = custom_audio, queued_time=queued_time)
 
     @slash_command()
     async def volume(self, ctx:ApplicationContext, volume:float):

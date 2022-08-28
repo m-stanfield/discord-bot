@@ -54,9 +54,6 @@ class BaseCog(commands.Cog):
             nicknames = [nicknames]
         output = "```\nNicknames"
         entry:NicknamesTable
-        
-
-
         for entry in nicknames:
             entry = entry[0]
             timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(entry.time))
