@@ -87,11 +87,12 @@ class DiscordBot(Bot):
     async def playUserAudio(self, channel: discord.VoiceChannel, member:discord.Member, custom_audio:bool|None = None, queued_time:float|None = None):
         settings:SettingsTable = await self.db.getSettingEntry(member)
         percent_chance = np.random.uniform(0, 1.0)
-        log_string = f"Attemping to play a audio clip with custom_audio being {custom_audio} with a relative frequency of {settings.custom_audio_relative_frequency}  and a rolled value of {percent_chance}."
-        logger.info(log_string)
 
-        custom_audio:bool = (percent_chance < settings.custom_audio_relative_frequency) if custom_audio is None else custom_audio
-        file_name:str = await self.db.getUserAudioFile(member = member, custom_audio=custom_audio)
+
+        use_custom_audio:bool = (percent_chance < settings.custom_audio_relative_frequency) if custom_audio is None else custom_audio
+        log_string = f"Attemping to play a audio clip with custom_audio initially being {custom_audio} overriden to {use_custom_audio} with a relative frequency of {settings.custom_audio_relative_frequency}  and a rolled value of {percent_chance}."
+        logger.info(log_string)
+        file_name:str = await self.db.getUserAudioFile(member = member, custom_audio=use_custom_audio)
         if file_name is not None and os.path.isfile(file_name):
 
             await self.playAudio(channel, file_name=file_name, volume=settings.volume, length=settings.length, queued_time=queued_time)
@@ -104,7 +105,7 @@ class DiscordBot(Bot):
         within_allowed_time = (runtime - queued_time) < max_delay if queued_time else True
 
         if self.voice_clients == [] and within_allowed_time:
-            logger.info(f"Playing")
+            logger.info(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")            
             voice = await channel.connect(timeout=1.0)
             source = discord.PCMVolumeTransformer(
                 discord.FFmpegPCMAudio(file_name), volume=volume)
@@ -112,8 +113,7 @@ class DiscordBot(Bot):
                 'player error: %s' % e) if e else None)
             await asyncio.sleep(length)
             await voice.disconnect()
-            logger.info(
-                f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")
+            
         elif not(within_allowed_time):
             logger.info(f"Could not play audio file due to queued time ({queued_time}) and run time ({runtime}) being greater than the maximum allowed time ({max_delay}).")
         else:
