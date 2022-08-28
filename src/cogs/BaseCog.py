@@ -11,6 +11,7 @@ import time
 from discord.commands import slash_command, ApplicationContext
 from src.logger import Logger
 import inspirobot
+import datetime
 
 import src.Utilities as utils
 
@@ -47,12 +48,21 @@ class BaseCog(commands.Cog):
     async def nicknames(self, ctx:ApplicationContext, number:int = 10):
         nicknames = await self.bot.db.getNicknameEntries(ctx.author,number_of_entries=number)
         if nicknames is None:
+            await self.bot.addMethodToQueue(ctx.respond, "No nicknames found")
             return
-        output = "```Nicknames"
+        if type(nicknames) is not list:
+            nicknames = [nicknames]
+        output = "```\nNicknames"
         entry:NicknamesTable
+        
+
 
         for entry in nicknames:
-            output += f"\n{entry.time}: {entry.display_name}"
+            entry = entry[0]
+            timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(entry.time))
+            output += f"\n{timestr}: {entry.display_name}"
+        output += "```"
+
         await self.bot.addMethodToQueue(ctx.respond, output)
          
 
