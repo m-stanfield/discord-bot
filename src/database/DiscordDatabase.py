@@ -118,14 +118,16 @@ class DiscordDatabase(BaseDataBase):
 
     async def getUserAudioFile(self, member:discord.Member, custom_audio:bool=False):
         if custom_audio:
+            logger.info("Attemping to load custom audio")
             base_path = Settings.get(['data','audio','custom'])
         else:
+            logger.info("Attemping to load nickname audio")
             base_path = Settings.get(['data','audio','nicknames']) 
         path = os.path.join(base_path, self._generateMP3Name(member))
 
         if custom_audio and not(os.path.isfile(path)):
+            logger.info(f"Failed to load custom audio as {path} is not a file")
             path = await self.getUserAudioFile(member=member, custom_audio=False)
-
         return path if path is not None and os.path.isfile(path) else None
 
     def generateAndGetSayClip(self, text:str, lang:str = "en") -> str:
