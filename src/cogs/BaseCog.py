@@ -55,7 +55,8 @@ class BaseCog(commands.Cog):
         output = "```\nNicknames"
         entry:NicknamesTable
         for entry in nicknames:
-            entry = entry[0]
+            if not(isinstance(entry, NicknamesTable)):
+                entry = entry[0]
             timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(entry.time))
             output += f"\n{timestr}: {entry.display_name}"
         output += "```"
