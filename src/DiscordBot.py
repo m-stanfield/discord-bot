@@ -93,9 +93,10 @@ class DiscordBot(Bot):
         log_string = f"Attemping to play a audio clip with custom_audio initially being {custom_audio} overriden to {use_custom_audio} with a relative frequency of {settings.custom_audio_relative_frequency}  and a rolled value of {percent_chance}."
         logger.info(log_string)
         file_name:str = await self.db.getUserAudioFile(member = member, custom_audio=use_custom_audio)
+        volume = settings.volume if use_custom_audio else 0.7
         if file_name is not None and os.path.isfile(file_name):
 
-            await self.playAudio(channel, file_name=file_name, volume=settings.volume, length=settings.length, queued_time=queued_time)
+            await self.playAudio(channel, file_name=file_name, volume=volume, length=settings.length, queued_time=queued_time)
 
     async def playAudio(self, channel: discord.VoiceChannel, file_name: str, volume: float = 0.1, length: float = 3, queued_time:float|None = None):
         logger.debug(
