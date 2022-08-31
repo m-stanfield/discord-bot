@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING
 from discord.client import Client
 import discord
-from discord import Option
+from discord import Option, guild_only
 import asyncio
 from src.database.schema import NicknamesTable
 from src.database import BaseDataBase
@@ -47,6 +47,7 @@ class BaseCog(commands.Cog):
         await self.bot.addMethodToQueue(ctx.respond, utils.roll_dice(roll_string))
 
     @slash_command(description="A history of which nicknames you have had.")
+    @guild_only()
     async def nicknames(self, ctx:ApplicationContext, 
                               number:Option(int, description="The number of nicknames to show.", default = 10), 
                               member:Option(discord.Member, description="The user who you want to see a nickname history for.", default = None)):

@@ -9,13 +9,12 @@ from discord.ext import commands
 from discord.ext.commands import Bot
 import time
 from discord.commands import slash_command, ApplicationContext
-from discord import option
 from src.logger import Logger
 import inspirobot
 import os
 import pathlib
 import re
-from discord import Option
+from discord import Option, guild_only
 import src.Utilities as utils
 from typing import Union
 
@@ -44,8 +43,8 @@ class AudioCog(commands.Cog):
         self.bot: DiscordBot = bot
 
         
-    
     @slash_command(description="Play a custom phrase audio clip")
+    @guild_only()
     async def say(self, ctx:ApplicationContext, 
                         text:Option(str, name="text",  description="Phrase to play"), 
                         lang:Option(str, name="lang",  description="The 'accents' used.", default=SAY_DEFAULT,required=False, autocomplete=get_lang)):
@@ -59,8 +58,9 @@ class AudioCog(commands.Cog):
         await ctx.delete()
         if os.path.exists(file_name):
             await self.bot.addMethodToQueue(self.bot.playAudio,channel = channel, file_name = file_name, volume = 1.0, length = 3)
-
+    
     @slash_command(description="Plays a user's audio clip.")
+    @guild_only()
     async def play(self, ctx:ApplicationContext, 
                          member:Option(discord.Member, description="Who's audio should I play?"), 
                          custom_audio:Option(bool, description="Should custom clip (True) or nickname (False) be used?", default=None)):
@@ -70,6 +70,7 @@ class AudioCog(commands.Cog):
         await self.bot.addMethodToQueue(self.bot.playUserAudio, channel, member, custom_audio = custom_audio, queued_time=queued_time)
 
     @slash_command(description="Adjust the volume for your custom audio clip.")
+    @guild_only()
     async def volume(self, ctx:ApplicationContext, 
                            volume:Option(float, description="The audio value to set, suggested value <0.5.", min_value=0.0)):
         await ctx.delete()
@@ -84,6 +85,7 @@ class AudioCog(commands.Cog):
             await session.commit()
 
     @slash_command(description="Sets the length of an custom audio clip.")
+    @guild_only()
     async def length(self, ctx:ApplicationContext,
                            length:Option(float, description="Length of clip (max 3 seconds)", min_value=0, max_value=3)):
         await ctx.delete()
@@ -98,6 +100,7 @@ class AudioCog(commands.Cog):
             await session.commit()
 
     @slash_command(description="Sets the rate of custom audio plays.")
+    @guild_only() 
     async def custom_audio(self, ctx:ApplicationContext, 
                                  ratio:Option(float, description="Rate of custom audio. 0 is never 1 is always.",min_value=0, max_value=1)):
         await ctx.delete()
@@ -112,6 +115,7 @@ class AudioCog(commands.Cog):
             await session.commit()
 
     @slash_command(description="Should I play your audio if you are the only one on a voice channel?")
+    @guild_only()
     async def solo_play(self, ctx:ApplicationContext, enable:Option(bool, description="Enable (true) or Disable (false)")):
         await ctx.delete()
         if not(type(enable) == bool):
@@ -126,6 +130,7 @@ class AudioCog(commands.Cog):
             await session.commit()
 
     @slash_command(description="Upload a custom audio clip for when you join a voice channel.")
+    @guild_only()
     async def upload_audio(self, ctx:ApplicationContext, 
                                  attachment:Option(discord.Attachment, description="The mp3 file to set as your custom audio.")):
         await ctx.delete()
