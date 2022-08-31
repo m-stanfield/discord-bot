@@ -1,3 +1,4 @@
+from pydoc import describe
 from typing import TYPE_CHECKING
 from discord.client import Client
 import discord
@@ -13,43 +14,64 @@ from src.logger import Logger
 import inspirobot
 import os
 import pathlib
-
+import re
+from discord import Option
 import src.Utilities as utils
+from typing import Union
 
 import numpy as np
 
 from src.database.schema import (GUILD_TABLE, NICKNAME_TABLE, SETTING_TABLE,
                                  USER_TABLE, Base, GuildsTable, NicknamesTable, SettingsTable,
                                  UsersTable)
-
+import gtts.lang
 logger = Logger(__name__)
 
 if TYPE_CHECKING:
     from src.DiscordBot import DiscordBot
+SAY_DEFAULT = gtts.lang.tts_langs()["en"]
+SAY_LANGS_DICT = {word:key for key, word in gtts.lang.tts_langs().items()}
+SAY_LANGS_CHOICES = list(SAY_LANGS_DICT.keys())
 
+
+async def get_lang(ctx: discord.AutocompleteContext):
+    """Returns a list of colors that begin with the characters entered so far."""
+    return [lang for lang in SAY_LANGS_CHOICES if lang.lower().startswith(ctx.value.lower())]
 
 class AudioCog(commands.Cog):
     def __init__(self, bot):
         logger.info("Loading Audio Cog")
         self.bot: DiscordBot = bot
 
-    @slash_command()
-    async def say(self, ctx:ApplicationContext, text:str, lang:str = "en"):
+        
+    
+    @slash_command(description="Play a custom phrase audio clip")
+    async def say(self, ctx:ApplicationContext, 
+                        text:Option(str, name="text",  description="Phrase to play"), 
+                        lang:Option(str, name="lang",  description="The 'accents' used.", default=SAY_DEFAULT,required=False, autocomplete=get_lang)):
         channel:discord.VoiceChannel = self.bot.findMemberInVoiceChannel(ctx=ctx)
-        file_name = self.bot.db.generateAndGetSayClip(text = text, lang = lang)
+        if not(channel):
+            await self.bot.addMethodToQueue(ctx.author.send, "For the say command to work, you are required to be in a voice channel I can see.")
+            await self.bot.addMethodToQueue(ctx.delete)
+            return
+        cleaned_text = re.sub("[^A-Za-z0-9 ]+", '', text) # removes all character except alphanumeric and spaces
+        file_name = self.bot.db.generateAndGetSayClip(text = cleaned_text, lang = SAY_LANGS_DICT[lang])
         await ctx.delete()
         if os.path.exists(file_name):
             await self.bot.addMethodToQueue(self.bot.playAudio,channel = channel, file_name = file_name, volume = 1.0, length = 3)
 
-    @slash_command()
-    async def play(self, ctx:ApplicationContext, member:discord.Member, custom_audio:bool|None = None):
+    @slash_command(description="Plays a user's audio clip.")
+    async def play(self, ctx:ApplicationContext, 
+                         member:Option(discord.Member, description="Who's audio should I play?"), 
+                         custom_audio:Option(bool, description="Should custom clip (True) or nickname (False) be used?", default=None)):
         channel:discord.VoiceChannel = self.bot.findMemberInVoiceChannel(ctx=ctx)
         queued_time = time.time()
         await ctx.delete()
         await self.bot.addMethodToQueue(self.bot.playUserAudio, channel, member, custom_audio = custom_audio, queued_time=queued_time)
 
-    @slash_command()
-    async def volume(self, ctx:ApplicationContext, volume:float):
+    @slash_command(description="Adjust the volume for your custom audio clip.")
+    async def volume(self, ctx:ApplicationContext, 
+                           volume:Option(float, description="The audio value to set, suggested value <0.5.", min_value=0.0)):
         await ctx.delete()
         if not(type(volume) == float):
             return
@@ -61,12 +83,13 @@ class AudioCog(commands.Cog):
             setting.volume = volume
             await session.commit()
 
-    @slash_command()
-    async def length(self, ctx:ApplicationContext, length:float):
+    @slash_command(description="Sets the length of an custom audio clip.")
+    async def length(self, ctx:ApplicationContext,
+                           length:Option(float, description="Length of clip (max 3 seconds)", min_value=0, max_value=3)):
         await ctx.delete()
         if not(type(length) == float):
             return
-
+        length = length if length < 3.0 else 3.0
         updated_member:discord.Member = ctx.author
         logger.info(f"Setting length for member {updated_member.id} on {updated_member.guild.id} to a length of {length}")
         async with self.bot.db._async_session() as session: 
@@ -74,8 +97,9 @@ class AudioCog(commands.Cog):
             setting.length = length
             await session.commit()
 
-    @slash_command()
-    async def custom_audio(self, ctx:ApplicationContext, ratio:float):
+    @slash_command(description="Sets the rate of custom audio plays.")
+    async def custom_audio(self, ctx:ApplicationContext, 
+                                 ratio:Option(float, description="Rate of custom audio. 0 is never 1 is always.",min_value=0, max_value=1)):
         await ctx.delete()
         if not(type(ratio) == float):
             return
@@ -87,8 +111,8 @@ class AudioCog(commands.Cog):
             setting.custom_audio_relative_frequency = ratio
             await session.commit()
 
-    @slash_command()
-    async def solo_play(self, ctx:ApplicationContext, enable:bool):
+    @slash_command(description="Should I play your audio if you are the only one on a voice channel?")
+    async def solo_play(self, ctx:ApplicationContext, enable:Option(bool, description="Enable (true) or Disable (false)")):
         await ctx.delete()
         if not(type(enable) == bool):
             ctx.author.send("Improper slash command arguments. Solo play slash command requires a true/false value.")
@@ -101,9 +125,9 @@ class AudioCog(commands.Cog):
             setting.solo_audio_play = enable
             await session.commit()
 
-    @slash_command()
-    @option("attachment", discord.Attachment, description="The mp3 file to set as your custom audio.")
-    async def upload_audio(self, ctx:ApplicationContext, attachment: discord.Attachment):
+    @slash_command(description="Upload a custom audio clip for when you join a voice channel.")
+    async def upload_audio(self, ctx:ApplicationContext, 
+                                 attachment:Option(discord.Attachment, description="The mp3 file to set as your custom audio.")):
         await ctx.delete()
         memberForAudio = ctx.author # TODO: add optional super call
         if not(attachment):

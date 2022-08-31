@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 from discord.client import Client
 import discord
+from discord import Option
 import asyncio
 from src.database.schema import NicknamesTable
 from src.database import BaseDataBase
@@ -30,8 +31,9 @@ class BaseCog(commands.Cog):
 
         self.bot: DiscordBot = bot
 
-    @slash_command()
-    async def inspire(self, ctx:ApplicationContext, member: discord.Member | None = None):
+    @slash_command(description="Brighten someone's day by posting an inspirational image!")
+    async def inspire(self, ctx:ApplicationContext, 
+                            member: Option(discord.Member,description="Whoever you want to inspire!", default = None)):
         output = ""
         if isinstance(member, discord.Member):
             output += utils.memberToMentionString(member=member)
@@ -39,23 +41,25 @@ class BaseCog(commands.Cog):
         output += inspirobot.generate().url
         await self.bot.addMethodToQueue(ctx.respond,output)
 
-    @slash_command()
-    async def roll(self, ctx:ApplicationContext, roll_string=""):
-        '''Rolls dice. !roll <dice string>. Dice string exmaple: 1d20 -4d2 + 8 -2d2'''
+    @slash_command(description= "Rolls dice. !roll <dice string>. Dice string exmaple: 1d20 -4d2 + 8 -2d2")
+    async def roll(self, ctx:ApplicationContext, 
+                         roll_string:Option(str, description="Dice you want to be rolled.", default="1d100")):
         await self.bot.addMethodToQueue(ctx.respond, utils.roll_dice(roll_string))
 
-    @slash_command()
-    async def nicknames(self, ctx:ApplicationContext, number:int = 10):
-        nicknames = await self.bot.db.getNicknameEntries(ctx.author,number_of_entries=number)
+    @slash_command(description="A history of which nicknames you have had.")
+    async def nicknames(self, ctx:ApplicationContext, 
+                              number:Option(int, description="The number of nicknames to show.", default = 10), 
+                              member:Option(discord.Member, description="The user who you want to see a nickname history for.", default = None)):
+        member = member if member is not None else ctx.author
+        nicknames = await self.bot.db.getNicknameEntries(member,number_of_entries=number)
         if nicknames is None:
             await self.bot.addMethodToQueue(ctx.respond, "No nicknames found")
             return
-        if type(nicknames) is not list:
-            nicknames = [nicknames]
+
         output = "```\nNicknames"
         entry:NicknamesTable
         for entry in nicknames:
-            if len(nicknames) > 0:
+            if not(isinstance(nicknames, list)):
                 entry = entry[0]
             timestr = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(entry.time))
             output += f"\n{timestr}: {entry.display_name}"
