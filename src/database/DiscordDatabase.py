@@ -101,6 +101,8 @@ class DiscordDatabase(BaseDataBase):
     async def getNicknameEntries(self, member:discord.Member, number_of_entries:int=None):
         stmt = select(NicknamesTable).where(NicknamesTable.user_id == member.id, NicknamesTable.guild_id == member.guild.id).order_by(NicknamesTable.time.desc())
         result = await self.execute(stmt)
+        if not(isinstance(result, list)):
+            result = [result]
         return result if result is None or number_of_entries is None or isinstance(result, NicknamesTable) or len(result) < number_of_entries  else result[:number_of_entries]
 
     async def generateMemberAudio(self, member:discord.Member) -> bool:
