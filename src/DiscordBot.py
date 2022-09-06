@@ -43,6 +43,7 @@ class DiscordBot(Bot):
         self.connection_status = False
         self.run_status = True
         self.ready = False
+        self.test_mode = kwargs.pop("test_mode",False)
 
         
 

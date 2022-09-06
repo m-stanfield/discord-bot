@@ -32,10 +32,12 @@ class ListenerCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         # Note: may be ran multiple times.
+        self.bot.ready = True
+        if self.bot.test_mode:
+            return
         logger.info("Updating all guild information")
         await self.bot.db.updateAllGuilds(guilds=self.bot.guilds, regenerate_audio=True)
         logger.info("Completed updating all guild information")
-        self.bot.ready = True
 
     @commands.Cog.listener()
     async def on_connect(self):
