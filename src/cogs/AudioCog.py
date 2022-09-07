@@ -14,7 +14,7 @@ import inspirobot
 import os
 import pathlib
 import re
-from discord import Option, guild_only
+from discord import Option, guild_only, user_command
 import src.Utilities as utils
 from typing import Union
 
@@ -42,7 +42,6 @@ class AudioCog(commands.Cog):
         logger.info("Loading Audio Cog")
         self.bot: DiscordBot = bot
 
-        
     @slash_command(description="Play a custom phrase audio clip")
     @guild_only()
     async def say(self, ctx:ApplicationContext, 
@@ -68,6 +67,10 @@ class AudioCog(commands.Cog):
         queued_time = time.time()
         await ctx.delete()
         await self.bot.addMethodToQueue(self.bot.playUserAudio, channel, member, custom_audio = custom_audio, queued_time=queued_time)
+
+    @user_command()
+    async def play_audio(self, ctx:ApplicationContext, member:discord.Member):
+        await self.play(ctx=ctx, member = member, custom_audio = None)
 
     @slash_command(description="Adjust the volume for your custom audio clip.")
     @guild_only()
