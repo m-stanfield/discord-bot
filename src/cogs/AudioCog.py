@@ -68,7 +68,7 @@ class AudioCog(commands.Cog):
         await ctx.delete()
         await self.bot.addMethodToQueue(self.bot.playUserAudio, channel, member, custom_audio = custom_audio, queued_time=queued_time)
 
-    @user_command()
+    @user_command(name="Play")
     async def play_audio(self, ctx:ApplicationContext, member:discord.Member):
         await self.play(ctx=ctx, member = member, custom_audio = None)
 
