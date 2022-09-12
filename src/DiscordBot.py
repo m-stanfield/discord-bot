@@ -106,7 +106,8 @@ class DiscordBot(Bot):
         max_delay = float(Settings.get("MAX_PLAY_DELAY"))
         within_allowed_time = (runtime - queued_time) < max_delay if queued_time else True
 
-        if self.voice_clients == [] and within_allowed_time:
+        channel_guilds = [chan.guild for chan in self.voice_clients]
+        if channel.guild not in channel_guilds and within_allowed_time:
             logger.info(f"Attempting to play audio file {file_name} with volume {volume} and length {length} on channel {channel.name} on {channel.guild.name}")            
             voice = await channel.connect(timeout=1.0)
             source = discord.PCMVolumeTransformer(
