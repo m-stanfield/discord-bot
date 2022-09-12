@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 SAY_DEFAULT = gtts.lang.tts_langs()["en"]
 SAY_LANGS_DICT = {word:key for key, word in gtts.lang.tts_langs().items()}
 SAY_LANGS_CHOICES = list(SAY_LANGS_DICT.keys())
-
+MAX_CUSTOM_AUDIO_LENGTH = 4.0
 
 async def get_lang(ctx: discord.AutocompleteContext):
     """Returns a list of colors that begin with the characters entered so far."""
@@ -90,11 +90,11 @@ class AudioCog(commands.Cog):
     @slash_command(description="Sets the length of an custom audio clip.")
     @guild_only()
     async def length(self, ctx:ApplicationContext,
-                           length:Option(float, description="Length of clip (max 3 seconds)", min_value=0, max_value=3)):
+                           length:Option(float, description="Length of clip (max 3 seconds)", min_value=0, max_value=MAX_CUSTOM_AUDIO_LENGTH)):
         await ctx.delete()
         if not(type(length) == float):
             return
-        length = length if length < 3.0 else 3.0
+        length = length if length < MAX_CUSTOM_AUDIO_LENGTH else MAX_CUSTOM_AUDIO_LENGTH
         updated_member:discord.Member = ctx.author
         logger.info(f"Setting length for member {updated_member.id} on {updated_member.guild.id} to a length of {length}")
         async with self.bot.db._async_session() as session: 
