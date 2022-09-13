@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 SAY_DEFAULT = gtts.lang.tts_langs()["en"]
 SAY_LANGS_DICT = {word:key for key, word in gtts.lang.tts_langs().items()}
 SAY_LANGS_CHOICES = list(SAY_LANGS_DICT.keys())
-MAX_CUSTOM_AUDIO_LENGTH = 4.0
+MAX_CUSTOM_AUDIO_LENGTH = 3.0
 
 async def get_lang(ctx: discord.AutocompleteContext):
     """Returns a list of colors that begin with the characters entered so far."""
@@ -75,47 +75,58 @@ class AudioCog(commands.Cog):
     @slash_command(description="Adjust the volume for your custom audio clip.")
     @guild_only()
     async def volume(self, ctx:ApplicationContext, 
-                           volume:Option(float, description="The audio value to set, suggested value <0.5.", min_value=0.0)):
+                           volume:Option(float, description="The audio value to set, suggested value <0.5.", min_value=0.0),
+                           member:Option(discord.Member, description="The member whos audio settings will be editted (Admin Only)",default=None)):
         await ctx.delete()
         if not(type(volume) == float):
             return
-
-        updated_member:discord.Member = ctx.author
-        logger.info(f"Setting volume for member {updated_member.id} on {updated_member.guild.id} to a volume of {volume}")
+        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        updated_member:discord.Member = member or ctx.author
+        logger.info(f"{ctx.author} changed the volume for member {updated_member.id} on {updated_member.guild.id} to a volume of {volume}")
         async with self.bot.db._async_session() as session: 
             setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
             setting.volume = volume
             await session.commit()
+            await ctx.author.send(f"{ctx.author} changed the  volume for member {updated_member} on {updated_member.guild} to a volume of {volume}")
 
     @slash_command(description="Sets the length of an custom audio clip.")
     @guild_only()
     async def length(self, ctx:ApplicationContext,
-                           length:Option(float, description="Length of clip (max 3 seconds)", min_value=0, max_value=MAX_CUSTOM_AUDIO_LENGTH)):
+                           length:Option(float, description="Length of clip (max 3 seconds)", min_value=0),
+                           member:Option(discord.Member, description="The member whos audio settings will be editted (Admin Only)",default=None)):
         await ctx.delete()
         if not(type(length) == float):
             return
-        length = length if length < MAX_CUSTOM_AUDIO_LENGTH else MAX_CUSTOM_AUDIO_LENGTH
-        updated_member:discord.Member = ctx.author
-        logger.info(f"Setting length for member {updated_member.id} on {updated_member.guild.id} to a length of {length}")
+        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        updated_member:discord.Member = member or ctx.author
+
+        length = length if length < MAX_CUSTOM_AUDIO_LENGTH or ctx.channel.permissions_for(ctx.author).administrator else MAX_CUSTOM_AUDIO_LENGTH
+
+        logger.info(f"{ctx.author} changed the  length for member {updated_member.id} on {updated_member.guild.id} to a length of {length}")
         async with self.bot.db._async_session() as session: 
             setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
             setting.length = length
             await session.commit()
+            await ctx.author.send(f"{ctx.author} changed the  length for member {updated_member} on {updated_member.guild} to a length of {length}")
 
     @slash_command(description="Sets the rate of custom audio plays.")
     @guild_only() 
     async def custom_audio(self, ctx:ApplicationContext, 
-                                 ratio:Option(float, description="Rate of custom audio. 0 is never 1 is always.",min_value=0, max_value=1)):
+                                 ratio:Option(float, description="Rate of custom audio. 0 is never 1 is always.",min_value=0, max_value=1),
+                                 member:Option(discord.Member, description="The member whos audio settings will be editted (Admin Only)",default=None)):
+
         await ctx.delete()
         if not(type(ratio) == float):
             return
 
-        updated_member:discord.Member = ctx.author
-        logger.info(f"Setting custom audio relative frequency for member {updated_member.id} on {updated_member.guild.id} to a length of {ratio}")
+        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        updated_member:discord.Member = member or ctx.author
+        logger.info(f"{ctx.author} changed the custom audio relative frequency for member {updated_member.id} on {updated_member.guild.id} to a length of {ratio}")
         async with self.bot.db._async_session() as session: 
             setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
             setting.custom_audio_relative_frequency = ratio
             await session.commit()
+            await ctx.author.send(f"{ctx.author} changed the custom audio relative frequency for member {updated_member} on {updated_member.guild} to a length of {ratio}")
 
     @slash_command(description="Should I play your audio if you are the only one on a voice channel?")
     @guild_only()
@@ -126,18 +137,22 @@ class AudioCog(commands.Cog):
             return
 
         updated_member:discord.Member = ctx.author
-        logger.info(f"Setting solo play for member {updated_member.id} on {updated_member.guild.id} to {enable}")
+        logger.info(f"{ctx.author} changed the solo play for member {updated_member.id} on {updated_member.guild.id} to {enable}")
         async with self.bot.db._async_session() as session: 
             setting:SettingsTable = await self.bot.db.getSettingEntry(member=updated_member, session=session)
             setting.solo_audio_play = enable
             await session.commit()
+            await ctx.author.send(f"{ctx.author} changed the custom audio relative frequency for member {updated_member} on {updated_member.guild} to a length of {ratio}")
 
     @slash_command(description="Upload a custom audio clip for when you join a voice channel.")
     @guild_only()
     async def upload_audio(self, ctx:ApplicationContext, 
-                                 attachment:Option(discord.Attachment, description="The mp3 file to set as your custom audio.")):
+                                 attachment:Option(discord.Attachment, description="The mp3 file to set as your custom audio."),
+                                 member:Option(discord.Member, description="The member whos audio settings will be editted (Admin Only)",default=None)):
+   
         await ctx.delete()
-        memberForAudio = ctx.author # TODO: add optional super call
+        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        memberForAudio:discord.Member = member or ctx.author
         if not(attachment):
             await ctx.author.send("No attachment was sent with custom audio upload slash command")
             return
