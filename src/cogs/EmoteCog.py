@@ -39,9 +39,10 @@ class EmoteCog(commands.Cog):
         self.bot: DiscordBot = bot
 
     async def autocomplete_emote(self, ctx: discord.AutocompleteContext):
+        current_input = ctx.value.lower()
         results = await self.bot.db.getAllGuildEmoteEntries(guild=ctx.interaction.guild)
         if (results):
-            return [result[0].emote_name for result in results if result[0].emote_name.lower().startswith(ctx.value.lower())] if type(results) == list else [results.emote_name]
+            return [result[0].emote_name for result in results if len(current_input) == 0 and result[0].emote_name.lower().startswith(current_input)] if type(results) == list else [results.emote_name]
         return []
 
     @slash_command(description="Post a custom server emote!")
