@@ -57,7 +57,6 @@ class EmoteCog(commands.Cog):
         ctx.author.send(f"No emote with the name {emote_name} found in the server {ctx.guild.name}.")
 
 
-    @default_permissions(administrator=True)
     @slash_command(description="Upload a custom server emote.")
     @guild_only()
     async def upload_emote(self, ctx:ApplicationContext, 
@@ -66,6 +65,10 @@ class EmoteCog(commands.Cog):
                                  overwrite:Option(bool, description="Overwrite emote name if it already exists", default=False)):
    
         await ctx.delete()
+        if not(ctx.channel.permissions_for(ctx.author).administrator):
+            ctx.author.send("Uploading an emote for a server requires being an admin for that server.")
+            return
+
         IMAGE_FORMATS:tuple = (".png",".jpeg",".tiff",".tif",".jpg", ".gif", ".bmp")
         file_name:str = attachment.filename
 
