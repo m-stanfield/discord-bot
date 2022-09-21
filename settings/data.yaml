@@ -1,5 +1,5 @@
 images:
-  sticker: "data/images/stickers/"
+  emotes: "data/images/emotes/"
 audio:
   nicknames: "data/audio/nicknames/"
   custom: "data/audio/custom/"
