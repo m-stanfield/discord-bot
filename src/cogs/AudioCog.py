@@ -92,7 +92,7 @@ class AudioCog(commands.Cog):
     @slash_command(description="Sets the length of an custom audio clip.")
     @guild_only()
     async def length(self, ctx:ApplicationContext,
-                           length:Option(float, description="Length of clip (max 3 seconds)", min_value=0),
+                           length:Option(float, description=f"Length of clip (max {MAX_CUSTOM_AUDIO_LENGTH} seconds)", min_value=0),
                            member:Option(discord.Member, description="The member whos audio settings will be editted (Admin Only)",default=None)):
         await ctx.delete()
         if not(type(length) == float):
