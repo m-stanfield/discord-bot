@@ -41,6 +41,7 @@ class EmoteCog(commands.Cog):
     async def autocomplete_emote(self, ctx: discord.AutocompleteContext):
         current_input = ctx.value.lower()
         results = await self.bot.db.getAllGuildEmoteEntries(guild=ctx.interaction.guild)
+        print(results)
         if (results):
             return [result[0].emote_name for result in results if len(current_input) == 0 and result[0].emote_name.lower().startswith(current_input)] if type(results) == list else [results.emote_name]
         return []
@@ -57,15 +58,17 @@ class EmoteCog(commands.Cog):
         ctx.author.send(f"No emote with the name {emote_name} found in the server {ctx.guild.name}.")
 
 
-    @default_permissions(administrator=True)
-    @slash_command(description="Upload a custom server emote.")
-    @guild_only()
+    @slash_command(description="Upload a custom server emote.")    
+    @default_permissions(administrator=True,)
     async def upload_emote(self, ctx:ApplicationContext, 
                                  emote_name:Option(str, description="The name that will be used by the emote",required=True),
                                  attachment:Option(discord.Attachment, description="The image file to set as a server emote."),
                                  overwrite:Option(bool, description="Overwrite emote name if it already exists", default=False)):
    
         await ctx.delete()
+        if not(ctx.guild):
+            ctx.author.send("Requires to be sent in a message")
+            return
         IMAGE_FORMATS:tuple = (".png",".jpeg",".tiff",".tif",".jpg", ".gif", ".bmp")
         file_name:str = attachment.filename
 
