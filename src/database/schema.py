@@ -24,6 +24,8 @@ USER_TABLE = 'UsersTable'
 GUILD_TABLE = 'GuildsTable'
 SETTING_TABLE = 'SettingsTable'
 NICKNAME_TABLE = 'NicknamesTable'
+EMOTES_TABLE = 'EmotesTable'
+
 
 
 class UsersTable(Base):
@@ -42,6 +44,21 @@ class UsersTable(Base):
         user.user_id = member.id
         user.user_name = member.name
         return user
+
+class EmotesTable(Base):
+    __tablename__ = EMOTES_TABLE
+
+    id = Column(Integer, primary_key=True)
+    guild_id = Column(Integer, ForeignKey(f"{GUILD_TABLE}.guild_id"), nullable=False)
+    emote_name = Column(String, nullable=False)
+    path = Column(String, nullable=False)
+
+    unique_id_1 = UniqueConstraint("guild_id", "emote_name")
+    guild_relationship = relationship(GUILD_TABLE, primaryjoin=f"and_({GUILD_TABLE}.guild_id == {__tablename__}.guild_id)")
+
+    def __repr__(self):
+        return f"<{EMOTES_TABLE}(id={self.id}, guild_id={self.guild_id}, emote_name={self.emote_name}, path={self.path})>"
+
 class NicknamesTable(Base):
     __tablename__ = NICKNAME_TABLE
 

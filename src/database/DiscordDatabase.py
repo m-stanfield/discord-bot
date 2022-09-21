@@ -19,7 +19,7 @@ from sqlalchemy.orm import (Session, declarative_base, relationship,
 from src.database.BaseDatabase import BaseDataBase
 from src.database.schema import (GUILD_TABLE, NICKNAME_TABLE, SETTING_TABLE,
                                  USER_TABLE, Base, GuildsTable, NicknamesTable, SettingsTable,
-                                 UsersTable)
+                                 UsersTable, EmotesTable)
 from src.Settings import Settings
 from src.logger import Logger
 
@@ -92,6 +92,10 @@ class DiscordDatabase(BaseDataBase):
 
     async def getGuildEntry(self, guild:discord.Guild, session:Session|None=None):
         stmt = select(GuildsTable).where(GuildsTable.guild_id == guild.id)
+        return await self.execute(stmt, session)
+
+    async def getGuildEmoteEntry(self, guild:discord.Guild, image_name:str, session:Session|None=None):
+        stmt = select(EmotesTable).where(EmotesTable.guild_id == guild.id, EmotesTable.emote_name == image_name )
         return await self.execute(stmt, session)
 
     async def getNicknameEntry(self, member:discord.Member, session:Session|None=None):

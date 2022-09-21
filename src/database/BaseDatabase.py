@@ -36,11 +36,9 @@ class BaseDataBase:
                 database_loc = os.path.join(database_path, database_name)
                 if not(os.path.isdir(database_path)):
                     os.mkdir(database_path)
-            databaseExists = os.path.exists(database_loc)
             cls._engine: sqlalchemy.engine.Engine = create_async_engine(f'sqlite+aiosqlite:///{database_loc}')
-            if not(databaseExists):
-                async with cls._engine.begin() as conn:
-                    await conn.run_sync(Base.metadata.create_all)
+            async with cls._engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
             cls._async_session = sessionmaker(cls._engine, expire_on_commit=False, class_=AsyncSession)        
         return cls()
 
