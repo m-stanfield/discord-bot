@@ -98,6 +98,10 @@ class DiscordDatabase(BaseDataBase):
         stmt = select(EmotesTable).where(EmotesTable.guild_id == guild.id, EmotesTable.emote_name == image_name )
         return await self.execute(stmt, session)
 
+    async def getAllGuildEmoteEntries(self, guild:discord.Guild, session:Session|None=None):
+        stmt = select(EmotesTable).where(EmotesTable.guild_id == guild.id)
+        return await self.execute(stmt, session)
+
     async def getNicknameEntry(self, member:discord.Member, session:Session|None=None):
         stmt = select(NicknamesTable).where(NicknamesTable.user_id == member.id, NicknamesTable.guild_id == member.guild.id)
         return await self.execute(stmt, session)
