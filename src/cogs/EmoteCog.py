@@ -41,6 +41,7 @@ class EmoteCog(commands.Cog):
     async def autocomplete_emote(self, ctx: discord.AutocompleteContext):
         current_input = ctx.value.lower()
         results = await self.bot.db.getAllGuildEmoteEntries(guild=ctx.interaction.guild)
+        print(results)
         if (results):
             return [result[0].emote_name for result in results if len(current_input) == 0 and result[0].emote_name.lower().startswith(current_input)] if type(results) == list else [results.emote_name]
         return []
@@ -69,6 +70,9 @@ class EmoteCog(commands.Cog):
             ctx.author.send("Uploading an emote for a server requires being an admin for that server.")
             return
 
+        if not(ctx.guild):
+            ctx.author.send("Requires to be sent in a message")
+            return
         IMAGE_FORMATS:tuple = (".png",".jpeg",".tiff",".tif",".jpg", ".gif", ".bmp")
         file_name:str = attachment.filename
 
