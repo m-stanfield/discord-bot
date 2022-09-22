@@ -66,7 +66,7 @@ class EmoteCog(commands.Cog):
                                  overwrite:Option(bool, description="Overwrite emote name if it already exists", default=False)):
    
         await ctx.delete()
-        if not(ctx.channel.permissions_for(ctx.author).administrator):
+        if not(await self.bot.isAdmin(user=ctx.author, channel=ctx.channel)):
             await ctx.author.send("Uploading an emote for a server requires being an admin for that server.")
             return
 

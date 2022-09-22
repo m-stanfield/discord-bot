@@ -80,7 +80,7 @@ class AudioCog(commands.Cog):
         await ctx.delete()
         if not(type(volume) == float):
             return
-        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        member = member if await self.bot.isAdmin(user=ctx.author, channel=ctx.channel) else None
         updated_member:discord.Member = member or ctx.author
         logger.info(f"{ctx.author} changed the volume for member {updated_member.id} on {updated_member.guild.id} to a volume of {volume}")
         async with self.bot.db._async_session() as session: 
@@ -97,10 +97,11 @@ class AudioCog(commands.Cog):
         await ctx.delete()
         if not(type(length) == float):
             return
-        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        isAdmin = await self.bot.isAdmin(user=ctx.author, channel=ctx.channel)
+        member = member if isAdmin else None
         updated_member:discord.Member = member or ctx.author
 
-        length = length if length < MAX_CUSTOM_AUDIO_LENGTH or ctx.channel.permissions_for(ctx.author).administrator else MAX_CUSTOM_AUDIO_LENGTH
+        length = length if length < MAX_CUSTOM_AUDIO_LENGTH or isAdmin else MAX_CUSTOM_AUDIO_LENGTH
 
         logger.info(f"{ctx.author} changed the  length for member {updated_member.id} on {updated_member.guild.id} to a length of {length}")
         async with self.bot.db._async_session() as session: 
@@ -119,7 +120,7 @@ class AudioCog(commands.Cog):
         if not(type(ratio) == float):
             return
 
-        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        member = member if await self.bot.isAdmin(user=ctx.author, channel=ctx.channel) else None
         updated_member:discord.Member = member or ctx.author
         logger.info(f"{ctx.author} changed the custom audio relative frequency for member {updated_member.id} on {updated_member.guild.id} to a length of {ratio}")
         async with self.bot.db._async_session() as session: 
@@ -151,7 +152,7 @@ class AudioCog(commands.Cog):
                                  member:Option(discord.Member, description="The member whos audio settings will be editted (Admin Only)",default=None)):
    
         await ctx.delete()
-        member = member if ctx.channel.permissions_for(ctx.author).administrator else None
+        member = member if await self.bot.isAdmin(user=ctx.author, channel=ctx.channel) else None
         memberForAudio:discord.Member = member or ctx.author
         if not(attachment):
             await ctx.author.send("No attachment was sent with custom audio upload slash command")
