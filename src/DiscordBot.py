@@ -1,21 +1,28 @@
 from __future__ import annotations
-import discord
-from discord.ext.commands import Bot
+
+from typing import Union
+
 import asyncio
-from discord.ext import tasks, commands
-from src.cogs import ListenerCog, BaseCog, AudioCog, AdminCog, EmoteCog
+import inspect
+import os
+import time
+from typing import Callable
+
+import discord
+import numpy as np
+from discord.ext import commands, tasks
+from discord.ext.commands import Bot
+
+from src.cogs import AdminCog, AudioCog, BaseCog, EmoteCog, ListenerCog
 from src.database import DiscordDatabase, SettingsTable
 from src.logger import Logger
 from src.Settings import Settings
-import time
-from typing import Callable
-import discord
-import numpy as np
-import os
-import inspect
+
+from discord.abc import GuildChannel
+
+
 
 logger = Logger(__name__)
-
 
 class DiscordBot(Bot):
 
@@ -76,6 +83,11 @@ class DiscordBot(Bot):
             logger.info("KeyboardInterrupt: Exiting Program")
             await self.db.close()
             await self.close()
+
+    async def isAdmin(self, user:discord.User, channel:GuildChannel|None=None) -> bool:
+        is_owner = await self.is_owner(user)
+        is_admin = channel.permissions_for(user).administrator if channel else False
+        return is_owner or is_admin
 
     async def setRunStatus(self, status: bool):
         self.run_status = status
