@@ -53,7 +53,7 @@ class EmoteCog(commands.Cog):
         if result:
             path = result.path
             if path:
-                await self.bot.addMethodToQueue(ctx.respond,file = discord.File(path))
+                await self.bot.addMethodToQueue(ctx.respond,f"`Emote Name: {emote_name}`", file = discord.File(path))
                 return
         ctx.author.send(f"No emote with the name {emote_name} found in the server {ctx.guild.name}.")
 
@@ -97,7 +97,6 @@ class EmoteCog(commands.Cog):
         async with self.bot.db._async_session() as session: 
             result = await self.bot.db.getGuildEmoteEntry(ctx.guild, emote_name,session=session)
 
-            print(result)
             if result:
                 result.path = path
             else:
@@ -105,9 +104,8 @@ class EmoteCog(commands.Cog):
                 emoteEntry.guild_id = ctx.guild_id
                 emoteEntry.emote_name = emote_name
                 emoteEntry.path = path
-                print(emoteEntry)
                 await self.bot.db.insert(emoteEntry)
         
         await attachment.save(pathlib.Path(path))
         file = await attachment.to_file()
-        await ctx.author.send(f"The following image file has been set as a custom emote on {ctx.guild}",file=file)
+        await ctx.author.send(f"The following image file has been set as a custom emote on {ctx.guild} with the name {emote_name}",file=file)
