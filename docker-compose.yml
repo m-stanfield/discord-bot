@@ -1,0 +1,11 @@
+version: "3.9"
+services:
+    bot:
+        build: .
+        restart: always
+        volumes:
+            - ./logs:/code/logs
+            - ./settings:/code/settings
+            - ./data:/code/data
+        env_file:
+            - .env
