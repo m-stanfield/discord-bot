@@ -160,6 +160,8 @@ class DiscordDatabase(BaseDataBase):
         return f"guild{member.guild.id}_member{member.id}.mp3"
 
     def _generateTTS(self, text:str, path:str, lang:str='en') -> bool:
+        if len(text) == 0:
+            return False
         if os.path.isfile(path):
             os.remove(path)
         try:

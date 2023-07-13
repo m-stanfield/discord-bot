@@ -17,6 +17,7 @@ import re
 from discord import Option, guild_only, user_command
 import src.Utilities as utils
 from typing import Union
+import string
 
 import numpy as np
 
@@ -52,7 +53,7 @@ class AudioCog(commands.Cog):
             await self.bot.addMethodToQueue(ctx.author.send, "For the say command to work, you are required to be in a voice channel I can see.")
             await self.bot.addMethodToQueue(ctx.delete)
             return
-        cleaned_text = re.sub("[^A-Za-z0-9 ]+", '', text) # removes all character except alphanumeric and spaces
+        cleaned_text = text.strip(string.punctuation) # removes all character except alphanumeric and spaces
         file_name = self.bot.db.generateAndGetSayClip(text = cleaned_text, lang = SAY_LANGS_DICT[lang])
         await ctx.delete()
         if os.path.exists(file_name):
