@@ -73,7 +73,7 @@ class EmoteCog(commands.Cog):
         if not(ctx.guild):
             ctx.author.send("Requires to be sent in a message")
             return
-        IMAGE_FORMATS:tuple = (".png",".jpeg",".tiff",".tif",".jpg", ".gif", ".bmp")
+        IMAGE_FORMATS:tuple = (".png",".jpeg",".tiff",".tif",".jpg", ".gif", ".bmp",".mov")
         file_name:str = attachment.filename
 
 
@@ -85,7 +85,7 @@ class EmoteCog(commands.Cog):
             await ctx.author.send("No attachment was sent with custom audio upload slash command")
             return
         if not(file_name.lower().endswith(IMAGE_FORMATS)):
-            await ctx.author.send("Audio files must be one of the following image types: " + IMAGE_FORMATS)
+            await ctx.author.send("Audio files must be one of the following image types: " + str(IMAGE_FORMATS))
             return
         if os.path.isfile(path) and not(overwrite):
             await ctx.author.send("Image file already exists for this guild. Upload under a new name or overwrite the previous image.")
