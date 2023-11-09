@@ -73,7 +73,7 @@ class EmoteCog(commands.Cog):
         if not(ctx.guild):
             ctx.author.send("Requires to be sent in a message")
             return
-        IMAGE_FORMATS:tuple = (".png",".jpeg",".tiff",".tif",".jpg", ".gif", ".bmp", ".mov")
+        IMAGE_FORMATS:tuple = (".png",".jpeg",".tiff",".tif",".jpg", ".gif", ".bmp",".mov")
         file_name:str = attachment.filename
 
 

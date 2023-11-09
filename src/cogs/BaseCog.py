@@ -13,10 +13,12 @@ from discord.commands import slash_command, ApplicationContext
 from src.logger import Logger
 import inspirobot
 import datetime
+from urllib.parse import urlparse
 
 import src.Utilities as utils
 
 import numpy as np
+import re
 
 
 logger = Logger(__name__)
@@ -26,10 +28,26 @@ if TYPE_CHECKING:
 
 
 class BaseCog(commands.Cog):
+    url_regex = re.compile("^(https?:\/\/)?(www\.)?")
     def __init__(self, bot):
         logger.info("Loading Base Cog")
 
         self.bot: DiscordBot = bot
+
+
+
+    @slash_command(description="Embed a tiktoc/twitter post")
+    async def embed(self, ctx:ApplicationContext, 
+                            link: str):
+        output = ""
+        stripped_link = self.url_regex.sub("",link)
+        embed_link = "https://www.vx" + stripped_link
+        if isinstance(ctx.author, discord.Member):
+            output += "Posted by: "
+            output += utils.memberToMentionString(member=ctx.author)
+            output += "\n\n"
+        output += embed_link
+        await self.bot.addMethodToQueue(ctx.respond,output)
 
     @slash_command(description="Brighten someone's day by posting an inspirational image!")
     async def inspire(self, ctx:ApplicationContext, 
