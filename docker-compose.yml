@@ -2,6 +2,7 @@ version: "3.9"
 services:
     bot:
         build: .
+        user: ${UID:-0}
         restart: always
         volumes:
             - ./logs:/code/logs
