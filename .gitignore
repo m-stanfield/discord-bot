@@ -6,9 +6,8 @@
 *.jpg
 data/audio/*
 logs/*
-settings/*
 data/images/*
-cogs/image_cog.py
+src/cogs/image_cog.py
 !settings/default_settings.dat
 !data/audio/.gitkeep
 !logs/.gitkeep
@@ -147,3 +146,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+data/database/discord_bot.db
+src/pycord_tests/slash_command_example.py
+src/database/examples/test_sqlite3.py
+src/cogs/image_cog.py
+src/cogs/image_cog.py
+src/tests/database/test.db
+src/tests/database/test_schema.db
